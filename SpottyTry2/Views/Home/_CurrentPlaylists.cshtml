@@ -1,0 +1,7 @@
+﻿@model Dictionary<string,string>
+
+<p>Current Playlist</p>
+@foreach (var d in Model)
+{
+    @Html.Display(d.Key)
+}

@@ -1,1 +1,30 @@
-﻿<p>fuck you</p>
+﻿<p>Playlist management</p>
+
+Token = @Session["SpotToke"]
+
+<button id="getCurrent">Get current playlists</button>
+<button id="createNew">Create a new playlist</button>
+<div id="createPlaylist" style="display: none" >
+    @Html.Partial("_NewPlaylist")
+</div>
+<div id="currentPlaylists" style="display: none">
+   
+</div>
+
+<script>
+    $("#getCurrent").click(function() {
+        $("#currentPlaylists").show();
+        $("#createPlaylist").hide();
+        $.ajax({
+            type: "GET",
+            url: "/Home/CurrentPlaylist",
+            success: function(test) {
+                $("#currentPlaylists").html(test);
+            }
+        });
+    });
+    $("#createNew").click(function () {
+        $("#currentPlaylists").hide();
+        $("#createPlaylist").show();
+    });
+</script>

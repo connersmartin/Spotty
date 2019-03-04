@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.UI.WebControls;
 using Microsoft.Ajax.Utilities;
 using SpottyTry2.Models;
@@ -76,6 +77,31 @@ namespace SpottyTry2.Controllers
 
         }
 
+        public async Task<ActionResult> CurrentPlaylist()
+        {
+            var paramDict = new Dictionary<string, string>()
+            {
+                { "Authorization", "Bearer "+Session["SpotToke"]}
+            };
+
+            string postString = "https://api.spotify.com/v1/me/playlists";
+
+            HttpClient rest = new HttpClient();
+
+            rest.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(paramDict.Keys.First(), paramDict.Values.First());
+     
+            var req = new HttpRequestMessage(HttpMethod.Get, postString) { Content = new FormUrlEncodedContent(paramDict) };
+
+            HttpResponseMessage response = await rest.GetAsync(postString);
+
+            //need to figure out how to deserialize properly
+
+            var res = JsonConvert.DeserializeObject(response.Content.ReadAsStringAsync().Result);
+
+
+            return PartialView("_CurrentPlaylists", res );
+   
+        }
     }
 
 

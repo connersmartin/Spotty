@@ -166,8 +166,11 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Image.cs" />
     <Compile Include="Models\SpotAuth.cs" />
     <Compile Include="Models\SpotInfo.cs" />
+    <Compile Include="Models\SpotList.cs" />
+    <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -221,6 +224,8 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\PlayCreate.cshtml" />
+    <Content Include="Views\Home\_CurrentPlaylists.cshtml" />
+    <Content Include="Views\Home\_NewPlaylist.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
