@@ -166,10 +166,15 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Artist.cs" />
+    <Compile Include="Models\BaseSpotify.cs" />
     <Compile Include="Models\Image.cs" />
+    <Compile Include="Models\ListResponse.cs" />
     <Compile Include="Models\SpotAuth.cs" />
     <Compile Include="Models\SpotInfo.cs" />
     <Compile Include="Models\SpotList.cs" />
+    <Compile Include="Models\Track.cs" />
+    <Compile Include="Models\TrackCount.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

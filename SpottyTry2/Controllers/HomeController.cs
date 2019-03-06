@@ -11,6 +11,7 @@ using System.Web.UI.WebControls;
 using Microsoft.Ajax.Utilities;
 using SpottyTry2.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 
 namespace SpottyTry2.Controllers
@@ -96,7 +97,11 @@ namespace SpottyTry2.Controllers
 
             //need to figure out how to deserialize properly
 
-            var res = JsonConvert.DeserializeObject(response.Content.ReadAsStringAsync().Result);
+            var resp = response.Content.ReadAsStringAsync().Result;
+
+            var res = JsonConvert.DeserializeObject<ListResponse>(resp);
+
+
 
 
             return PartialView("_CurrentPlaylists", res );

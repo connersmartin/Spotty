@@ -1,7 +1,7 @@
-﻿@model Dictionary<string,string>
+﻿@model SpottyTry2.Models.ListResponse
 
 <p>Current Playlist</p>
-@foreach (var d in Model)
+@foreach (var m in Model.Items)
 {
-    @Html.Display(d.Key)
+    <text>@m.Name<br/></text>
 }
