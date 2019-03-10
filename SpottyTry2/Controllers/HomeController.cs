@@ -26,9 +26,11 @@ namespace SpottyTry2.Controllers
 
         public async Task<RedirectResult> Spotify()
         {
+            //Not running this through API function since we require a specific response on this
             HttpClient rest = new HttpClient();
             try
             {
+                // TODO parameterize this to use config values
                 HttpResponseMessage response = await rest.GetAsync("https://accounts.spotify.com/authorize?client_id=fa659689165644618ef6368f3d2927b2&response_type=code&redirect_uri=http://localhost:21722/Home/TokenGrabber");
 
                 return Redirect(response.RequestMessage.RequestUri.ToString());
@@ -42,8 +44,10 @@ namespace SpottyTry2.Controllers
 
         }
 
+        //Gets the token from the spotify redirect and auths
         public async Task<ActionResult> TokenGrabber()
         {
+            //TODO Parameterize this shit for config
             var paramDict = new Dictionary<string, string>();
 
             var tokenResponse = HttpContext.Request.QueryString;
@@ -55,57 +59,66 @@ namespace SpottyTry2.Controllers
             paramDict.Add("code", tokenResponse["code"]);
 
 
-            string postString = "https://accounts.spotify.com/api/token";
+            var postString = "https://accounts.spotify.com/api/token";
 
-            HttpClient rest = new HttpClient();
+            var auth = await SpotApi(HttpMethod.Post, postString, new KeyValuePair<string, string>(), paramDict);
+
+            SpotAuth r = JsonConvert.DeserializeObject<SpotAuth>(auth.ToString());
+
+            Session["SpotToke"] = r.access_token;
+
+            return RedirectToAction("Index");
+
+        }
+
+        //Gets current users playlists
+        public async Task<ActionResult> CurrentPlaylist()
+        {
+            var auth = new KeyValuePair<string, string>("Authorization", "Bearer " + Session["SpotToke"]);
+
+            string getString = "https://api.spotify.com/v1/me/playlists";
+
+            var playlist = await SpotApi(HttpMethod.Get, getString, auth);
+
+            var res = JsonConvert.DeserializeObject<ListResponse>(playlist.ToString());
+
+            return PartialView("_CurrentPlaylists", res );
+   
+        }
+
+
+        //General API caller
+        public async Task<string> SpotApi(HttpMethod httpMethod, string url, KeyValuePair<string, string> auth, Dictionary<string, string> param = null)
+        {
             try
             {
-                var req = new HttpRequestMessage(HttpMethod.Post, postString) { Content = new FormUrlEncodedContent(paramDict) };
+                HttpClient rest = new HttpClient();
 
-                HttpResponseMessage response = await rest.SendAsync(req);
+                HttpResponseMessage response = new HttpResponseMessage();
 
-                SpotAuth r = JsonConvert.DeserializeObject<SpotAuth>(response.Content.ReadAsStringAsync().Result);
+                if (auth.Key != null)
+                {
+                    rest.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(auth.Key, auth.Value);
+                }
 
-                Session["SpotToke"] = r.access_token;
+                if (httpMethod == HttpMethod.Post)
+                {
+                    var req = new HttpRequestMessage(httpMethod, url) { Content = new FormUrlEncodedContent(param) };
+                    response = await rest.SendAsync(req);
+                }
+                else if (httpMethod == HttpMethod.Get)
+                {
+                    response = await rest.GetAsync(url);
+                }
 
-                return RedirectToAction("Index");
+                return response.Content.ReadAsStringAsync().Result;
+
             }
-            catch (System.Exception)
+            catch (Exception)
             {
 
                 throw;
             }
-
-        }
-
-        public async Task<ActionResult> CurrentPlaylist()
-        {
-            var paramDict = new Dictionary<string, string>()
-            {
-                { "Authorization", "Bearer "+Session["SpotToke"]}
-            };
-
-            string postString = "https://api.spotify.com/v1/me/playlists";
-
-            HttpClient rest = new HttpClient();
-
-            rest.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(paramDict.Keys.First(), paramDict.Values.First());
-     
-            var req = new HttpRequestMessage(HttpMethod.Get, postString) { Content = new FormUrlEncodedContent(paramDict) };
-
-            HttpResponseMessage response = await rest.GetAsync(postString);
-
-            //need to figure out how to deserialize properly
-
-            var resp = response.Content.ReadAsStringAsync().Result;
-
-            var res = JsonConvert.DeserializeObject<ListResponse>(resp);
-
-
-
-
-            return PartialView("_CurrentPlaylists", res );
-   
         }
     }
 
