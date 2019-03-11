@@ -1,7 +1,7 @@
-﻿@model SpottyTry2.Models.ListResponse
+﻿@model List<SpottyTry2.Models.SimplePlaylist>
 
 <p>Current Playlist</p>
-@foreach (var m in Model.Items)
+@foreach (var m in Model)
 {
-    <text>@m.Name<br/></text>
+    <text>@m.Name     @m.Length     @m.Count<br/></text>
 }

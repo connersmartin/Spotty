@@ -74,15 +74,44 @@ namespace SpottyTry2.Controllers
         //Gets current users playlists
         public async Task<ActionResult> CurrentPlaylist()
         {
+            var playlists = new List<SimplePlaylist>();
             var auth = new KeyValuePair<string, string>("Authorization", "Bearer " + Session["SpotToke"]);
 
             string getString = "https://api.spotify.com/v1/me/playlists";
 
             var playlist = await SpotApi(HttpMethod.Get, getString, auth);
-
+            //gets playlists
             var res = JsonConvert.DeserializeObject<ListResponse>(playlist.ToString());
+            var trackCount =0;
+            var pLength = 0;
+            //then get individual playlists to a list using a get on each playlist
+            foreach (var pList in res.Items)
+            {
+                //get the playlist detail
+                var getPlaylist = await SpotApi(HttpMethod.Get, pList.Href, auth);
 
-            return PartialView("_CurrentPlaylists", res );
+                var list = JsonConvert.DeserializeObject<SpotList>(getPlaylist);
+
+                //get the track detail
+                var getTracks = list.Tracks.Items;
+
+                foreach (var t in getTracks)
+                {
+                    pLength += t.Duration_Ms;
+                }
+
+                playlists.Add(new SimplePlaylist
+                {
+                    Name = pList.Name,
+                    Count = pList.Tracks.Total,
+                    Length = pLength / 360000
+                });
+            }
+            //then add up tracks for length using a get on each track
+
+
+
+            return PartialView("_CurrentPlaylists", playlists);
    
         }
 
