@@ -87,25 +87,35 @@ namespace SpottyTry2.Controllers
             //then get individual playlists to a list using a get on each playlist
             foreach (var pList in res.Items)
             {
-                //get the playlist detail
-                var getPlaylist = await SpotApi(HttpMethod.Get, pList.Href, auth);
-
-                var list = JsonConvert.DeserializeObject<SpotList>(getPlaylist);
-
-                //get the track detail
-                var getTracks = list.Tracks.Items;
-
-                foreach (var t in getTracks)
+                try
                 {
-                    pLength += t.Duration_Ms;
+                    //get the playlist detail
+                    var getPlaylist = await SpotApi(HttpMethod.Get, pList.Href, auth);
+
+                    
+                    var list = JsonConvert.DeserializeObject<SpotList>(getPlaylist);
+
+                    //get the track detail
+                    var getTracks = list.Tracks.Items;
+
+                    foreach (var t in getTracks)
+                    {
+                        pLength += t.Track.Duration_Ms;
+                    }
+
+                    playlists.Add(new SimplePlaylist
+                    {
+                        Name = pList.Name,
+                        Count = pList.Tracks.Total,
+                        Length = pLength / 360000
+                    });
+
                 }
-
-                playlists.Add(new SimplePlaylist
+                catch (Exception e)
                 {
-                    Name = pList.Name,
-                    Count = pList.Tracks.Total,
-                    Length = pLength / 360000
-                });
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
             //then add up tracks for length using a get on each track
 

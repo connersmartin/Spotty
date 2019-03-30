@@ -175,10 +175,12 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Album.cs" />
     <Compile Include="Models\Artist.cs" />
     <Compile Include="Models\BaseSpotify.cs" />
     <Compile Include="Models\Image.cs" />
     <Compile Include="Models\ListResponse.cs" />
+    <Compile Include="Models\PlaylistItems.cs" />
     <Compile Include="Models\SimplePlaylist.cs" />
     <Compile Include="Models\SpotAuth.cs" />
     <Compile Include="Models\SpotInfo.cs" />
