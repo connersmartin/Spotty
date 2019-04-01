@@ -21,5 +21,12 @@
     $("#createNew").click(function () {
         $("#currentPlaylists").hide();
         $("#createPlaylist").show();
+        $.ajax({
+            type: "GET",
+            url: "/Home/CurrentUser",
+            success: function (test) {
+                $("#createPlaylist").html(test);
+            }
+        });
     });
 </script>

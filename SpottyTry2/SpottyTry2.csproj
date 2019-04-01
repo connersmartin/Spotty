@@ -180,6 +180,7 @@
     <Compile Include="Models\BaseSpotify.cs" />
     <Compile Include="Models\Image.cs" />
     <Compile Include="Models\ListResponse.cs" />
+    <Compile Include="Models\PlayCreate.cs" />
     <Compile Include="Models\PlaylistItems.cs" />
     <Compile Include="Models\SimplePlaylist.cs" />
     <Compile Include="Models\SpotAuth.cs" />
@@ -243,6 +244,7 @@
     <Content Include="Views\Home\PlayCreate.cshtml" />
     <Content Include="Views\Home\_CurrentPlaylists.cshtml" />
     <Content Include="Views\Home\_NewPlaylist.cshtml" />
+    <Content Include="Views\Home\_Success.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

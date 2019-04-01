@@ -31,7 +31,7 @@ namespace SpottyTry2.Controllers
             try
             {
                 // TODO parameterize this to use config values
-                HttpResponseMessage response = await rest.GetAsync("https://accounts.spotify.com/authorize?client_id=fa659689165644618ef6368f3d2927b2&response_type=code&redirect_uri=http://localhost:21722/Home/TokenGrabber");
+                HttpResponseMessage response = await rest.GetAsync("https://accounts.spotify.com/authorize?client_id=fa659689165644618ef6368f3d2927b2&scope=playlist-modify-public&response_type=code&redirect_uri=http://localhost:21722/Home/TokenGrabber");
 
                 return Redirect(response.RequestMessage.RequestUri.ToString());
 
@@ -124,9 +124,43 @@ namespace SpottyTry2.Controllers
    
         }
 
+        [HttpPost]
+        //Creates a new playlist
+        public async Task<ActionResult> NewPlaylist(PlayCreate playCreate)
+        {
+            var auth = new KeyValuePair<string, string>("Authorization", "Bearer " + Session["SpotToke"]);
+            var paramDict = new Dictionary<string, string>()
+            {
+                { "name", playCreate.Name }
+            };
+            string postString = string.Format("https://api.spotify.com/v1/users/{0}/playlists", playCreate.UserId);
+            var playlist = await SpotApi(HttpMethod.Post, postString, auth, paramDict, true);
+            //creates new playlist
+            var res = JsonConvert.DeserializeObject<SpotList>(playlist);
+
+            //TODO populate playlist
+            //Like previous spotify app
+            //Based on genre BPM, etc
+
+            //TODO figure out what the hell to do here
+            //The idea is to show the tracks
+            return PartialView("_Success", res);
+        }
+        [HttpGet]
+        public async Task<ActionResult> CurrentUser()
+        {
+            var auth = new KeyValuePair<string, string>("Authorization", "Bearer " + Session["SpotToke"]);
+            var getString = "https://api.spotify.com/v1/me";
+
+            var res = await SpotApi(HttpMethod.Get, getString, auth);
+
+            var user = JsonConvert.DeserializeObject<User>(res);
+
+            return PartialView("_NewPlaylist", new PlayCreate() { UserId=user.Id });
+        }
 
         //General API caller
-        public async Task<string> SpotApi(HttpMethod httpMethod, string url, KeyValuePair<string, string> auth, Dictionary<string, string> param = null)
+        public async Task<string> SpotApi(HttpMethod httpMethod, string url, KeyValuePair<string, string> auth, Dictionary<string, string> param = null, bool json = false)
         {
             try
             {
@@ -141,8 +175,18 @@ namespace SpottyTry2.Controllers
 
                 if (httpMethod == HttpMethod.Post)
                 {
-                    var req = new HttpRequestMessage(httpMethod, url) { Content = new FormUrlEncodedContent(param) };
-                    response = await rest.SendAsync(req);
+                    if (!json)
+                    {
+                        var req = new HttpRequestMessage(httpMethod, url) { Content = new FormUrlEncodedContent(param) };
+                        response = await rest.SendAsync(req);
+                    }
+                    else
+                    {
+                        var j = JsonConvert.SerializeObject(param);
+                        var data = new StringContent(j, System.Text.Encoding.UTF8, "application/json");
+                        var req = new HttpRequestMessage(httpMethod, url) { Content = data };
+                        response = await rest.SendAsync(req);
+                    }
                 }
                 else if (httpMethod == HttpMethod.Get)
                 {
