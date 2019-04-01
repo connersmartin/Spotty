@@ -82,16 +82,15 @@ namespace SpottyTry2.Controllers
             var playlist = await SpotApi(HttpMethod.Get, getString, auth);
             //gets playlists
             var res = JsonConvert.DeserializeObject<ListResponse>(playlist.ToString());
-            var trackCount =0;
-            var pLength = 0;
+
             //then get individual playlists to a list using a get on each playlist
             foreach (var pList in res.Items)
             {
+                var pLength = 0;
                 try
                 {
                     //get the playlist detail
                     var getPlaylist = await SpotApi(HttpMethod.Get, pList.Href, auth);
-
                     
                     var list = JsonConvert.DeserializeObject<SpotList>(getPlaylist);
 
@@ -107,7 +106,7 @@ namespace SpottyTry2.Controllers
                     {
                         Name = pList.Name,
                         Count = pList.Tracks.Total,
-                        Length = pLength / 360000
+                        Length = pLength / 60000
                     });
 
                 }

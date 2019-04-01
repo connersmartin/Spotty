@@ -1,7 +1,22 @@
 ﻿@model List<SpottyTry2.Models.SimplePlaylist>
 
 <p>Current Playlist</p>
-@foreach (var m in Model)
-{
-    <text>@m.Name     @m.Length     @m.Count<br/></text>
-}
+<table class="table table-bordered table-responsive table-striped">
+    <thead>
+        <tr>
+            <th>Playlist Name</th>
+            <th>Length (min)</th>
+            <th>Track Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td>@m.Name</td>
+                <td>@m.Length</td>
+                <td>@m.Count</td>
+            </tr> 
+        }
+    </tbody>
+</table>

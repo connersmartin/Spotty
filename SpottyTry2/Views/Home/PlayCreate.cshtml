@@ -1,15 +1,10 @@
 ﻿<p>Playlist management</p>
-
-Token = @Session["SpotToke"]
-
 <button id="getCurrent">Get current playlists</button>
 <button id="createNew">Create a new playlist</button>
 <div id="createPlaylist" style="display: none" >
     @Html.Partial("_NewPlaylist")
 </div>
-<div id="currentPlaylists" style="display: none">
-   
-</div>
+<div id="currentPlaylists" style="display: none"></div>
 
 <script>
     $("#getCurrent").click(function() {
