@@ -182,6 +182,8 @@
     <Compile Include="Models\ListResponse.cs" />
     <Compile Include="Models\PlayCreate.cs" />
     <Compile Include="Models\PlaylistItems.cs" />
+    <Compile Include="Models\Seed.cs" />
+    <Compile Include="Models\SeedResult.cs" />
     <Compile Include="Models\SimplePlaylist.cs" />
     <Compile Include="Models\SpotAuth.cs" />
     <Compile Include="Models\SpotInfo.cs" />

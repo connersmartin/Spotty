@@ -78,6 +78,25 @@
 
     </dl>
 </div>
+<table class="table table-bordered table-responsive table-striped">
+    <thead>
+    <tr>
+        <th>Artist</th>
+        <th>Length (min)</th>
+        <th>Track Count</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var m in Model.Tracks.Items)
+    {
+        <tr>
+            <td>@m.Track.Artists.First()</td>
+            <td>@m.Track.Name</td>
+            <td>@m.Track.Duration_Ms</td>
+        </tr> 
+    }
+    </tbody>
+</table>
 <p>
     @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
     @Html.ActionLink("Back to List", "Index")
