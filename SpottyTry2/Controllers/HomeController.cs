@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Permissions;
 using System.Web.UI.WebControls;
 using Microsoft.Ajax.Utilities;
 using SpottyTry2.Models;
@@ -100,14 +101,12 @@ namespace SpottyTry2.Controllers
                     {
                         pLength += t.Track.Duration_Ms;
                     }
-
                     playlists.Add(new SimplePlaylist
                     {
                         Name = pList.Name,
                         Count = pList.Tracks.Total,
                         Length = pLength / 60000
                     });
-
                 }
                 catch (Exception e)
                 {
@@ -120,10 +119,10 @@ namespace SpottyTry2.Controllers
         }
 
         [HttpPost]
-        //Creates a new playlist
+        //Creates a new playlist and populates it
         public async Task<ActionResult> NewPlaylist(PlayCreate playCreate)
         {
-            //var playlist = await CreateNewPlaylist(playCreate);
+            var playlist = await CreateNewPlaylist(playCreate);
 
             //TODO populate playlist
             //Like previous spotify app
@@ -133,41 +132,126 @@ namespace SpottyTry2.Controllers
             //https://api.spotify.com/v1/recommendations
             //using artists/genre seeds
 
-            var list = new string[0];
-
             var res = new SpotList();
 
-            var tracks = await PopulatePlaylist(list, 0, 0);
+            var tracks = await PopulatePlaylist(playCreate.Genre, 0, 60);
 
-            var postString = string.Format("https://api.spotify.com/v1/playlists/{0}/tracks", "3QWhYSixLYv8ZslQvhWzGN");
+            var postString = string.Format("https://api.spotify.com/v1/playlists/{0}/tracks", playlist.Id);
 
             foreach (var t in tracks)
             {
-
-                var builder = new UriBuilder(postString);
-                var query = HttpUtility.ParseQueryString(builder.Query);
-                query["uris"] = t.Uri;
-                builder.Query = query.ToString();
-                string url = builder.ToString();
+                var paramDict = new Dictionary<string,string>()
+                {
+                    {"uris",t.Uri }
+                };
+                var url = postString +"?"+ BuildParamString(paramDict);
+               
                 var response = await SpotApi(HttpMethod.Post, url);
             }
 
-            var getPlaylist = await SpotApi(HttpMethod.Get, "https://api.spotify.com/v1/playlists/3QWhYSixLYv8ZslQvhWzGN");
+            var getPlaylist = await SpotApi(HttpMethod.Get, playlist.Href);
 
             res = JsonConvert.DeserializeObject<SpotList>(getPlaylist);
             //TODO figure out what the hell to do here
             //The idea is to show the tracks
             return PartialView("_Success", res);
         }
+
         [HttpGet]
         public async Task<ActionResult> CurrentUser()
         {
             var user = await GetCurrentUser();
 
-            return PartialView("_NewPlaylist", new PlayCreate() { UserId=user.Id.ToString() });
+            //var genres = await GetCurrentGenres();
+
+            var g = new List<string>();
+                
+            //g = genres.ToList();
+            
+            return PartialView("_NewPlaylist", new PlayCreate() { UserId=user.Id.ToString(), Genres = g});
         }
 
-        //General API caller
+        
+
+        //Creates the new playlist
+        public async Task<SpotList> CreateNewPlaylist(PlayCreate playCreate)
+        {
+            var paramDict = new Dictionary<string, string>()
+            {
+                { "name", playCreate.Name }
+            };
+            string postString = string.Format("https://api.spotify.com/v1/users/{0}/playlists", playCreate.UserId);
+            var playlist = await SpotApi(HttpMethod.Post, postString, paramDict, true);
+            //creates new playlist
+            return JsonConvert.DeserializeObject<SpotList>(playlist);
+        }
+
+        //Gets current user id to make playlist
+        public async Task<User> GetCurrentUser()
+        {
+            var getString = "https://api.spotify.com/v1/me";
+
+            var res = await SpotApi(HttpMethod.Get, getString);
+
+            return JsonConvert.DeserializeObject<User>(res);
+        }
+
+        //Gets current genre seeds
+        public async Task<string[]> GetCurrentGenres()
+        {
+            var getString = "https://api.spotify.com/v1/recommendations/available-genre-seeds";
+
+            var res = await SpotApi(HttpMethod.Get, getString);
+
+            return JsonConvert.DeserializeObject<string[]>(res);
+        }
+
+        //Gets tracks to populate a playlist
+        public async Task<List<Track>> PopulatePlaylist(string seeds, int bpm, int length)
+        {
+            var trackList = new List<Track>();
+            var getString = "https://api.spotify.com/v1/recommendations";
+
+            var paramDict = new Dictionary<string,string>()
+            {
+                {"limit","50" }
+            };
+
+            paramDict.Add("seed_genres",seeds);
+
+
+            var res = await SpotApi(HttpMethod.Get, getString, paramDict);
+
+            var list = JsonConvert.DeserializeObject<SeedResult>(res).Tracks.ToList();
+
+            var totalTime = 1000 * 60 * length;
+
+            foreach (var l in list)
+            {
+                if (totalTime>0)
+                {
+                    trackList.Add(l);
+                }
+                    totalTime -= l.Duration_Ms;
+            }
+            return trackList;
+        }
+
+
+        //Param string builder
+        public string BuildParamString(Dictionary<string, string> param)
+        {
+            var builder = new UriBuilder();
+            var query = HttpUtility.ParseQueryString(builder.Query);
+            foreach (var t in param)
+            {
+                query[t.Key] = t.Value;
+            }
+            return query.ToString();
+        }
+
+
+        //Generic API method
         public async Task<string> SpotApi(HttpMethod httpMethod, string url, Dictionary<string, string> param = null, bool json = false)
         {
             var auth = new KeyValuePair<string, string>("Authorization", "Bearer " + Session["SpotToke"]);
@@ -205,9 +289,19 @@ namespace SpottyTry2.Controllers
                 }
                 else if (httpMethod == HttpMethod.Get)
                 {
-                    response = await rest.GetAsync(url);
+                    if (param == null)
+                    {
+                        response = await rest.GetAsync(url);
+                    }
+                    else
+                    {
+                        var builder = new UriBuilder(url)
+                        {
+                            Query = BuildParamString(param)
+                        };
+                        response = await rest.GetAsync(builder.ToString());
+                    }
                 }
-
                 return response.Content.ReadAsStringAsync().Result;
 
             }
@@ -217,65 +311,6 @@ namespace SpottyTry2.Controllers
                 throw;
             }
         }
-
-        public async Task<SpotList> CreateNewPlaylist(PlayCreate playCreate)
-        {
-            var paramDict = new Dictionary<string, string>()
-            {
-                { "name", playCreate.Name }
-            };
-            string postString = string.Format("https://api.spotify.com/v1/users/{0}/playlists", playCreate.UserId);
-            var playlist = await SpotApi(HttpMethod.Post, postString, paramDict, true);
-            //creates new playlist
-            return JsonConvert.DeserializeObject<SpotList>(playlist);
-        }
-
-        public async Task<User> GetCurrentUser()
-        {
-            var getString = "https://api.spotify.com/v1/me";
-
-            var res = await SpotApi(HttpMethod.Get, getString);
-
-            return JsonConvert.DeserializeObject<User>(res);
-        }
-
-        public async Task<List<Track>> PopulatePlaylist(string[] seeds, int bpm, int length)
-        {
-            var trackList = new List<Track>();
-            var getString = "https://api.spotify.com/v1/recommendations";
-
-            var paramDict = new Dictionary<string,string>()
-            {
-                {"seed_genres","alt-rock" },
-                {"limit","50" }
-            };
-            var builder = new UriBuilder(getString);
-            builder.Port = -1;
-            var query = HttpUtility.ParseQueryString(builder.Query);
-            query["seed_genres"] = "alt-rock";
-            query["limit"] = "50";
-            builder.Query = query.ToString();
-            string url = builder.ToString();
-
-            var res = await SpotApi(HttpMethod.Get, url);
-
-            var list = JsonConvert.DeserializeObject<SeedResult>(res).Tracks.ToList();
-
-            var totalTime = 1000 * 60 * 60;
-
-            foreach (var l in list)
-            {
-                if (totalTime>0)
-                {
-                    trackList.Add(l);
-                }
-                    totalTime -= l.Duration_Ms;
-                
-            }
-
-            return trackList;
-        }
-
 
 
     }

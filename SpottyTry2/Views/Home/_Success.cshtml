@@ -5,46 +5,6 @@
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.Href)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Href)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Type)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Type)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Uri)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Uri)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Collaborative)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Collaborative)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-
-        <dt>
             @Html.DisplayNameFor(model => model.Name)
         </dt>
 
@@ -52,29 +12,6 @@
             @Html.DisplayFor(model => model.Name)
         </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Public)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Public)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.PrimaryColor)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.PrimaryColor)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Snapshot_Id)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Snapshot_Id)
-        </dd>
 
     </dl>
 </div>
@@ -82,15 +19,15 @@
     <thead>
     <tr>
         <th>Artist</th>
-        <th>Length (min)</th>
-        <th>Track Count</th>
+        <th>Track name</th>
+        <th>Length</th>
     </tr>
     </thead>
     <tbody>
     @foreach (var m in Model.Tracks.Items)
     {
         <tr>
-            <td>@m.Track.Artists.First()</td>
+            <td>@m.Track.Artists.First().Name</td>
             <td>@m.Track.Name</td>
             <td>@m.Track.Duration_Ms</td>
         </tr> 
