@@ -177,10 +177,13 @@
     </Compile>
     <Compile Include="Models\Album.cs" />
     <Compile Include="Models\Artist.cs" />
+    <Compile Include="Models\ArtistFull.cs" />
+    <Compile Include="Models\ArtistResult.cs" />
     <Compile Include="Models\BaseSpotify.cs" />
     <Compile Include="Models\GenreList.cs" />
     <Compile Include="Models\Image.cs" />
     <Compile Include="Models\ListResponse.cs" />
+    <Compile Include="Models\PageResponse.cs" />
     <Compile Include="Models\PlayCreate.cs" />
     <Compile Include="Models\PlaylistItems.cs" />
     <Compile Include="Models\Seed.cs" />

@@ -5,8 +5,8 @@ using System.Web;
 
 namespace SpottyTry2.Models
 {
-    public class TrackCount:PageResponse
+    public class ArtistResult:PageResponse
     {
-        public PlaylistItems[] Items { get; set; }
+        public ArtistFull[] Items { get; set; }
     }
 }

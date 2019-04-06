@@ -231,14 +231,38 @@ namespace SpottyTry2.Controllers
             if (artistSeed != null)
             {
                 //need to get the artist id first!
-                paramDict.Add("seed_artists", artistSeed);
-            }
+                var artDict = new Dictionary<string, string>()
+                {
+                    { "q","\""+artistSeed+"\"" },
+                    {"type","artist" },
+                    {"limit","3" }
+                };
+                var artString = "https://api.spotify.com/v1/search";
 
+                var response = await SpotApi(HttpMethod.Get, artString, artDict);
+
+                var art = JsonConvert.DeserializeObject<Dictionary<string,ArtistResult>>(response);
+
+                int pop=0;
+                var chosen = new ArtistFull();
+
+                foreach (var a in art.Values.FirstOrDefault().Items)
+                {
+                    if (a.Popularity>pop)
+                    {
+                        pop = a.Popularity;
+                        chosen = a;
+                    }
+                }
+
+                paramDict.Add("seed_artists", chosen.Id);
+            }
 
             var res = await SpotApi(HttpMethod.Get, getString, paramDict);
 
             var list = JsonConvert.DeserializeObject<SeedResult>(res).Tracks.ToList();
 
+            //set a default length
             if (length <=0)
             {
                 length = 60;
