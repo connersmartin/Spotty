@@ -122,7 +122,6 @@ namespace SpottyTry2.Controllers
         //Creates a new playlist and populates it
         public async Task<ActionResult> NewPlaylist(PlayCreate playCreate)
         {
-            var playlist = await CreateNewPlaylist(playCreate);
 
             //TODO populate playlist
             //Like previous spotify app
@@ -134,7 +133,9 @@ namespace SpottyTry2.Controllers
 
             var res = new SpotList();
 
-            var tracks = await PopulatePlaylist(playCreate.Genre, 0, 60);
+            var tracks = await PopulatePlaylist(playCreate.Genre, playCreate.Artist, 0, playCreate.Length);
+
+            var playlist = await CreateNewPlaylist(playCreate);
 
             var postString = string.Format("https://api.spotify.com/v1/playlists/{0}/tracks", playlist.Id);
 
@@ -214,7 +215,7 @@ namespace SpottyTry2.Controllers
         }
 
         //Gets tracks to populate a playlist
-        public async Task<List<Track>> PopulatePlaylist(string seeds, int bpm, int length)
+        public async Task<List<Track>> PopulatePlaylist(string genreSeed, string artistSeed, int bpm, int length)
         {
             var trackList = new List<Track>();
             var getString = "https://api.spotify.com/v1/recommendations";
@@ -223,13 +224,25 @@ namespace SpottyTry2.Controllers
             {
                 {"limit","50" }
             };
-
-            paramDict.Add("seed_genres",seeds);
+            if (genreSeed != null)
+            {
+                paramDict.Add("seed_genres",genreSeed);
+            }
+            if (artistSeed != null)
+            {
+                //need to get the artist id first!
+                paramDict.Add("seed_artists", artistSeed);
+            }
 
 
             var res = await SpotApi(HttpMethod.Get, getString, paramDict);
 
             var list = JsonConvert.DeserializeObject<SeedResult>(res).Tracks.ToList();
+
+            if (length <=0)
+            {
+                length = 60;
+            }
 
             var totalTime = 1000 * 60 * length;
 
