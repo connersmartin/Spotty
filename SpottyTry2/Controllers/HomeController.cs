@@ -162,11 +162,18 @@ namespace SpottyTry2.Controllers
         {
             var user = await GetCurrentUser();
 
-            //var genres = await GetCurrentGenres();
+            var genres = await GetCurrentGenres();
 
-            var g = new List<string>();
-                
-            //g = genres.ToList();
+            var j = JsonConvert.DeserializeObject<GenreList>(genres);
+
+            var g = new List<SelectListItem>(){
+                new SelectListItem(){Text="Select a genre", Value="",Selected=true }
+            };
+
+            foreach (var sl in j.Genres)
+            {
+                g.Add(new SelectListItem() { Text = sl, Value = sl });
+            }
             
             return PartialView("_NewPlaylist", new PlayCreate() { UserId=user.Id.ToString(), Genres = g});
         }
@@ -197,13 +204,13 @@ namespace SpottyTry2.Controllers
         }
 
         //Gets current genre seeds
-        public async Task<string[]> GetCurrentGenres()
+        public async Task<string> GetCurrentGenres()
         {
             var getString = "https://api.spotify.com/v1/recommendations/available-genre-seeds";
 
             var res = await SpotApi(HttpMethod.Get, getString);
 
-            return JsonConvert.DeserializeObject<string[]>(res);
+            return res.ToString();
         }
 
         //Gets tracks to populate a playlist
