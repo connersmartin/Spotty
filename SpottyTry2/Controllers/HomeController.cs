@@ -25,6 +25,7 @@ namespace SpottyTry2.Controllers
             return View();
         }
 
+        //Assists in authorization
         public async Task<RedirectResult> Spotify()
         {
             //Not running this through API function since we require a specific response on this
@@ -73,6 +74,7 @@ namespace SpottyTry2.Controllers
         }
 
         //Gets current users playlists
+        //TODO try and cache this
         public async Task<ActionResult> CurrentPlaylist()
         {
             var playlists = new List<SimplePlaylist>();
@@ -105,7 +107,8 @@ namespace SpottyTry2.Controllers
                     {
                         Name = pList.Name,
                         Count = pList.Tracks.Total,
-                        Length = pLength / 60000
+                        Length = pLength / 60000,
+                        Id = pList.Id
                     });
                 }
                 catch (Exception e)
@@ -118,9 +121,8 @@ namespace SpottyTry2.Controllers
    
         }
 
-        [HttpPost]
         //Creates a new playlist and populates it
-        public async Task<ActionResult> NewPlaylist(PlayCreate playCreate)
+        public async Task<ActionResult> NewPlaylist(AdvTrack playCreate)
         {
 
             //TODO populate playlist
@@ -130,15 +132,15 @@ namespace SpottyTry2.Controllers
             //https://api.spotify.com/v1/recommendations/available-genre-seeds
             //https://api.spotify.com/v1/recommendations
             //using artists/genre seeds
-
             var res = new SpotList();
-
-            var tracks = await PopulatePlaylist(playCreate.Genre, playCreate.Artist, 0, playCreate.Length);
-
+            //get tracks to populate the playlist with
+            var tracks = await PopulatePlaylist(playCreate);
+            
+            //create playlist after getting tracks in case there is an error
             var playlist = await CreateNewPlaylist(playCreate);
 
             var postString = string.Format("https://api.spotify.com/v1/playlists/{0}/tracks", playlist.Id);
-
+            //add the tracks
             foreach (var t in tracks)
             {
                 var paramDict = new Dictionary<string,string>()
@@ -149,37 +151,32 @@ namespace SpottyTry2.Controllers
                
                 var response = await SpotApi(HttpMethod.Post, url);
             }
-
-            var getPlaylist = await SpotApi(HttpMethod.Get, playlist.Href);
-
-            res = JsonConvert.DeserializeObject<SpotList>(getPlaylist);
+            //grab the finished playlist
+           
             //TODO figure out what the hell to do here
             //The idea is to show the tracks
-            return PartialView("_Success", res);
+            return RedirectToAction("ViewPlaylist","Home", new { href = playlist.Id });
         }
 
-        [HttpGet]
+        //Reusable View playlist function
+        public async Task<ActionResult> ViewPlaylist(string href)
+        {
+            var getPlaylist = await SpotApi(HttpMethod.Get, "https://api.spotify.com/v1/playlists/"+href);
+
+            return View("ViewPlaylist", JsonConvert.DeserializeObject<SpotList>(getPlaylist));
+        }
+
+        //Gets the current user id for playlist creation
         public async Task<ActionResult> CurrentUser()
         {
+            //gets the id of the user
             var user = await GetCurrentUser();
-
-            var genres = await GetCurrentGenres();
-
-            var j = JsonConvert.DeserializeObject<GenreList>(genres);
-
-            var g = new List<SelectListItem>(){
-                new SelectListItem(){Text="Select a genre", Value="",Selected=true }
-            };
-
-            foreach (var sl in j.Genres)
-            {
-                g.Add(new SelectListItem() { Text = sl, Value = sl });
-            }
+            //gets currently available genres
+            var g = await GetCurrentGenres();
             
-            return PartialView("_NewPlaylist", new PlayCreate() { UserId=user.Id.ToString(), Genres = g});
+            return PartialView("_AdvTrackFeatures", new AdvTrack() { UserId=user.Id.ToString(), Genres = g});
         }
 
-        
 
         //Creates the new playlist
         public async Task<SpotList> CreateNewPlaylist(PlayCreate playCreate)
@@ -205,70 +202,41 @@ namespace SpottyTry2.Controllers
         }
 
         //Gets current genre seeds
-        public async Task<string> GetCurrentGenres()
+        public async Task<List<SelectListItem>> GetCurrentGenres()
         {
             var getString = "https://api.spotify.com/v1/recommendations/available-genre-seeds";
 
             var res = await SpotApi(HttpMethod.Get, getString);
 
-            return res.ToString();
+            var j = JsonConvert.DeserializeObject<GenreList>(res);
+
+            var g = new List<SelectListItem>(){
+                new SelectListItem(){Text="Select a genre", Value="",Selected=true }
+            };
+
+            foreach (var sl in j.Genres)
+            {
+                g.Add(new SelectListItem() { Text = sl, Value = sl });
+            }
+
+            return g;
         }
 
         //Gets tracks to populate a playlist
-        public async Task<List<Track>> PopulatePlaylist(string genreSeed, string artistSeed, int bpm, int length)
+        public async Task<List<Track>> PopulatePlaylist(AdvTrack playCreate)
         {
+           
+            //set a default length
+            var totalTime = playCreate.Length <= 0 ? 3600000 : 60000 * playCreate.Length;
             var trackList = new List<Track>();
             var getString = "https://api.spotify.com/v1/recommendations";
 
-            var paramDict = new Dictionary<string,string>()
-            {
-                {"limit","50" }
-            };
-            if (genreSeed != null)
-            {
-                paramDict.Add("seed_genres",genreSeed);
-            }
-            if (artistSeed != null)
-            {
-                //need to get the artist id first!
-                var artDict = new Dictionary<string, string>()
-                {
-                    { "q","\""+artistSeed+"\"" },
-                    {"type","artist" },
-                    {"limit","3" }
-                };
-                var artString = "https://api.spotify.com/v1/search";
-
-                var response = await SpotApi(HttpMethod.Get, artString, artDict);
-
-                var art = JsonConvert.DeserializeObject<Dictionary<string,ArtistResult>>(response);
-
-                int pop=0;
-                var chosen = new ArtistFull();
-
-                foreach (var a in art.Values.FirstOrDefault().Items)
-                {
-                    if (a.Popularity>pop)
-                    {
-                        pop = a.Popularity;
-                        chosen = a;
-                    }
-                }
-
-                paramDict.Add("seed_artists", chosen.Id);
-            }
-
+            var paramDict = await BuildRecParamDict(playCreate);
+                        
+            //get recommended tracks based on seeds
             var res = await SpotApi(HttpMethod.Get, getString, paramDict);
 
             var list = JsonConvert.DeserializeObject<SeedResult>(res).Tracks.ToList();
-
-            //set a default length
-            if (length <=0)
-            {
-                length = 60;
-            }
-
-            var totalTime = 1000 * 60 * length;
 
             foreach (var l in list)
             {
@@ -276,11 +244,62 @@ namespace SpottyTry2.Controllers
                 {
                     trackList.Add(l);
                 }
-                    totalTime -= l.Duration_Ms;
+                totalTime -= l.Duration_Ms;
             }
             return trackList;
         }
 
+        //Get an artist id based on text search
+        public async Task<string> GetSingleArtist(string artistSeed)
+        {
+            var artDict = new Dictionary<string, string>()
+                {
+                    { "q","\""+artistSeed+"\"" },
+                    {"type","artist" },
+                    {"limit","3" }
+                };
+            var artString = "https://api.spotify.com/v1/search";
+
+            var response = await SpotApi(HttpMethod.Get, artString, artDict);
+
+            var art = JsonConvert.DeserializeObject<Dictionary<string, ArtistResult>>(response);
+
+            int pop = 0;
+            var chosen = new ArtistFull();
+
+            foreach (var a in art.Values.FirstOrDefault().Items)
+            {
+                if (a.Popularity > pop)
+                {
+                    pop = a.Popularity;
+                    chosen = a;
+                }
+            }
+
+            return chosen.Id;
+        }
+
+        //Param Dictionary Builder
+        public async Task<Dictionary<string,string>> BuildRecParamDict(AdvTrack a)
+        {
+            var paramDict = new Dictionary<string, string>(){{"limit", "100" }};
+            if (a.Genre != null){paramDict.Add("seed_genres", a.Genre);}
+            if (a.Artist != null){ paramDict.Add("seed_artists", await GetSingleArtist(a.Artist)); }
+            if (a.Acousticness != null) { paramDict.Add("target_acousticness", a.Acousticness.ToString()); }
+            if (a.Danceability != null) { paramDict.Add("target_danceability", a.Danceability.ToString()); }
+            if (a.Energy != null) { paramDict.Add("target_energy", a.Energy.ToString()); }
+            if (a.Instrumentalness != null) { paramDict.Add("target_instrumentalness", a.Instrumentalness.ToString()); }
+            if (a.Key != null) { paramDict.Add("target_key", a.Key.ToString()); }
+            if (a.Liveness != null) { paramDict.Add("target_liveness", a.Liveness.ToString()); }
+            if (a.Loudness != null) { paramDict.Add("target_loudness", a.Loudness.ToString()); }
+            if (a.Mode != null) { paramDict.Add("target_mode", a.Mode.ToString()); }
+            if (a.Speechiness != null) { paramDict.Add("target_speechiness", a.Speechiness.ToString()); }
+            if (a.Tempo != null) { paramDict.Add("target_tempo", a.Tempo.ToString()); }
+            if (a.Time_signature != null) { paramDict.Add("target_time_signature", a.Time_signature.ToString()); }
+            if (a.Valence != null) { paramDict.Add("target_valence", a.Valence.ToString()); }
+
+            return paramDict;
+        }
 
         //Param string builder
         public string BuildParamString(Dictionary<string, string> param)
@@ -293,7 +312,6 @@ namespace SpottyTry2.Controllers
             }
             return query.ToString();
         }
-
 
         //Generic API method
         public async Task<string> SpotApi(HttpMethod httpMethod, string url, Dictionary<string, string> param = null, bool json = false)
@@ -355,9 +373,5 @@ namespace SpottyTry2.Controllers
                 throw;
             }
         }
-
-
     }
-
-
 }

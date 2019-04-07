@@ -1,9 +1,11 @@
 ﻿
-<div class="jumbotron">
-    <h1>Are you Authorized?</h1>
-    <p class="lead">AUTHORIZE</p>
-    <p><a href="/Home/Spotify" class="btn btn-primary btn-lg">Do it</a></p>
-</div>
+@if (Session["SpotToke"] == null)
+{
+    <div class="alert-warning">
+        <p>If you are seeing this message, please authorize this app if you would like to continue</p>
+        <p><a href="/Home/Spotify" class="btn btn-warning btn-group-lg">Authorize this app</a></p>
+    </div>
+}
 <div class="row">
     @Html.Partial("PlayCreate")
 </div>

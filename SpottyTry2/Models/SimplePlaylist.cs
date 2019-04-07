@@ -10,5 +10,6 @@ namespace SpottyTry2.Models
         public string Name { get; set; }
         public int Count { get; set; }
         public int Length { get; set; }
+        public string Id { get; set; }
     }
 }

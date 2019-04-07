@@ -1,20 +1,22 @@
-﻿<p>Playlist management</p>
-<button id="getCurrent">Get current playlists</button>
-<button id="createNew">Create a new playlist</button>
-@Session["SpotToke"]
-<div id="createPlaylist" style="display: none" >
- 
-</div>
+﻿<br />
+<div class="btn btn-primary btn-group-lg" id="getCurrent">Get current playlists</div>
+<div class="btn btn-primary btn-group-lg" id="createNew">Create a new playlist</div>
+<div class="btn btn-primary btn-group-lg" id="robots">Robots create a playlist</div>
+<div id="createPlaylist" style="display: none"></div>
 <div id="currentPlaylists" style="display: none"></div>
+<div id="createAdvancedPlaylist" style="display: none"></div>
+<div id="weAreTheRobots" style="display: none"></div>
+
 
 <script>
-    $("#getCurrent").click(function() {
+    $("#getCurrent").click(function () {
         $("#currentPlaylists").show();
         $("#createPlaylist").hide();
+        $("#weAreTheRobots").hide();
         $.ajax({
             type: "GET",
             url: "/Home/CurrentPlaylist",
-            success: function(test) {
+            success: function (test) {
                 $("#currentPlaylists").html(test);
             }
         });
@@ -22,11 +24,25 @@
     $("#createNew").click(function () {
         $("#currentPlaylists").hide();
         $("#createPlaylist").show();
+        $("#weAreTheRobots").hide();
         $.ajax({
             type: "GET",
             url: "/Home/CurrentUser",
             success: function (test) {
                 $("#createPlaylist").html(test);
+            }
+        });
+    });
+ 
+    $("#robots").click(function () {
+        $("#currentPlaylists").hide();
+        $("#createPlaylist").hide();
+        $("#weAreTheRobots").show();
+        $.ajax({
+            type: "GET",
+            url: "/ML/GetPlaylist",
+            success: function (test) {
+                $("#weAreTheRobots").html(test);
             }
         });
     });
