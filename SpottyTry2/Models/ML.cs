@@ -26,35 +26,47 @@ namespace SpottyTry2.Models
             public int? Time_signature { get; set; }
             public int? Duration_ms { get; set; }
             public string Uri { get; set; }*/
-            public float? Acousticness { get; set; }
-            public float? Danceability { get; set; }
-            public float? Energy { get; set; }
-            public float? Instrumentalness { get; set; }
-            public float? Valence { get; set; }
-            public bool Liked { get; set; }
+            public float Acousticness { get; set; }
+            public float Danceability { get; set; }
+            public float Energy { get; set; }
+            public float Instrumentalness { get; set; }
+            public float Valence { get; set; }
+            public float Label { get; set; }
         }
 
         public class TrackPredict
         {
-            public bool Prediction { get; set; }
+            public float PredictedLabel { get; set; }
         }
 
         public static List<AdvTrack> Predict(List<AdvTrack> goodTracks, List<AdvTrack> recTracks)
         {
+            List<TrackDetail> td = new List<TrackDetail>();
+            foreach (var g in goodTracks)
+            {
+                td.Add(new TrackDetail()
+                {
+                    Acousticness = g.Acousticness,
+                    Danceability = g.Danceability,
+                    Energy = g.Energy,
+                    Instrumentalness = g.Instrumentalness,
+                    Label = 1
+                });
+            }
             try
             {
 
                 MLContext mlContext = new MLContext();
 
-                IDataView trainingDataView = mlContext.Data.LoadFromEnumerable(goodTracks);
+                IDataView trainingDataView = mlContext.Data.LoadFromEnumerable(td);
 
-                var pipeline = mlContext.Transforms.Conversion.MapValueToKey("Liked")
-                    .Append(mlContext.Transforms.Concatenate("Acousticness", "Danceability", "Energy", "Instrumentalness",
+                var pipeline = mlContext.Transforms.Conversion.MapValueToKey("Label")
+                    .Append(mlContext.Transforms.Concatenate("Prediction","Acousticness", "Danceability", "Energy", "Instrumentalness",
                         "Valence"))
                     .AppendCacheCheckpoint(mlContext)
                     .Append(mlContext.MulticlassClassification.Trainers.StochasticDualCoordinateAscent(
-                        labelColumnName: "Liked", featureColumnName: "Features"))
-                    .Append(mlContext.Transforms.Conversion.MapKeyToValue("Prediction"));
+                        labelColumnName: "Label", featureColumnName: "Prediction"))
+                    .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
 
                 var model = pipeline.Fit(trainingDataView);
                 foreach (var track in recTracks)
@@ -67,7 +79,7 @@ namespace SpottyTry2.Models
                             Energy = track.Energy,
                             Instrumentalness = track.Instrumentalness
                         });
-                    if (!prediction.Prediction)
+                    if (prediction.PredictedLabel < .5)
                     {
                         recTracks.Remove(track);
                     }

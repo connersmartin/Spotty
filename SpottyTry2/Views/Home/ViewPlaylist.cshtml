@@ -19,7 +19,7 @@
         @foreach (var m in Model.Tracks.Items)
         {
             <tr>
-                <td>@m.Track.Artists.First().Name</td>
+                <td>@m.Track.Artists.FirstOrDefault().Name</td>
                 <td>@m.Track.Name</td>
                 <td>@m.Track.Duration_Ms</td>
             </tr>

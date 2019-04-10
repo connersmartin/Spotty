@@ -161,7 +161,9 @@ namespace SpottyTry2.Controllers
         {
             var getPlaylist = await SpotApi(HttpMethod.Get, "https://api.spotify.com/v1/playlists/"+href);
 
-            return View("ViewPlaylist", JsonConvert.DeserializeObject<SpotList>(getPlaylist));
+            var m = JsonConvert.DeserializeObject<SpotList>(getPlaylist);
+
+            return View("ViewPlaylist",m );
         }
 
         //returns array of playlist items
