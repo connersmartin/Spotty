@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.ML.0.11.0\build\netstandard2.0\Microsoft.ML.props" Condition="Exists('..\packages\Microsoft.ML.0.11.0\build\netstandard2.0\Microsoft.ML.props')" />
+  <Import Project="..\packages\Microsoft.ML.CpuMath.0.11.0\build\netstandard2.0\Microsoft.ML.CpuMath.props" Condition="Exists('..\packages\Microsoft.ML.CpuMath.0.11.0\build\netstandard2.0\Microsoft.ML.CpuMath.props')" />
   <Import Project="..\packages\Microsoft.Net.Native.Compiler.2.2.1\build\Microsoft.Net.Native.Compiler.props" Condition="Exists('..\packages\Microsoft.Net.Native.Compiler.2.2.1\build\Microsoft.Net.Native.Compiler.props')" />
   <Import Project="..\packages\runtime.win10-x86.Microsoft.Net.Native.Compiler.2.2.1\build\runtime.win10-x86.Microsoft.Net.Native.Compiler.props" Condition="Exists('..\packages\runtime.win10-x86.Microsoft.Net.Native.Compiler.2.2.1\build\runtime.win10-x86.Microsoft.Net.Native.Compiler.props')" />
   <Import Project="..\packages\runtime.win10-x86.Microsoft.Net.Native.SharedLibrary.2.2.1\build\runtime.win10-x86.Microsoft.Net.Native.SharedLibrary.props" Condition="Exists('..\packages\runtime.win10-x86.Microsoft.Net.Native.SharedLibrary.2.2.1\build\runtime.win10-x86.Microsoft.Net.Native.SharedLibrary.props')" />
@@ -11,6 +13,10 @@
   <Import Project="..\packages\runtime.win10-arm.Microsoft.Net.Native.SharedLibrary.2.2.1\build\runtime.win10-arm.Microsoft.Net.Native.SharedLibrary.props" Condition="Exists('..\packages\runtime.win10-arm.Microsoft.Net.Native.SharedLibrary.2.2.1\build\runtime.win10-arm.Microsoft.Net.Native.SharedLibrary.props')" />
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+  <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+	</PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -58,9 +64,63 @@
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Data.DataView, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.DataView.0.11.0\lib\netstandard2.0\Microsoft.Data.DataView.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ML.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ML.0.11.0\lib\netstandard2.0\Microsoft.ML.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ML.CpuMath, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ML.CpuMath.0.11.0\lib\netstandard2.0\Microsoft.ML.CpuMath.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ML.Data, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ML.0.11.0\lib\netstandard2.0\Microsoft.ML.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ML.FastTree, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ML.0.11.0\lib\netstandard2.0\Microsoft.ML.FastTree.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ML.KMeansClustering, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ML.0.11.0\lib\netstandard2.0\Microsoft.ML.KMeansClustering.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ML.PCA, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ML.0.11.0\lib\netstandard2.0\Microsoft.ML.PCA.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ML.StandardLearners, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ML.0.11.0\lib\netstandard2.0\Microsoft.ML.StandardLearners.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ML.Transforms, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ML.0.11.0\lib\netstandard2.0\Microsoft.ML.Transforms.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.CodeDom, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.CodeDom.4.4.0\lib\net461\System.CodeDom.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Collections.Immutable.1.5.0\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Memory, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.1\lib\netstandard2.0\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.4.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Dataflow.4.8.0\lib\netstandard2.0\System.Threading.Tasks.Dataflow.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -185,6 +245,7 @@
     <Compile Include="Models\GenreList.cs" />
     <Compile Include="Models\Image.cs" />
     <Compile Include="Models\ListResponse.cs" />
+    <Compile Include="Models\ML.cs" />
     <Compile Include="Models\PageResponse.cs" />
     <Compile Include="Models\PlayCreate.cs" />
     <Compile Include="Models\PlaylistItems.cs" />
@@ -339,6 +400,9 @@
     <Error Condition="!Exists('..\packages\runtime.win10-x86.Microsoft.Net.Native.Compiler.2.2.1\build\runtime.win10-x86.Microsoft.Net.Native.Compiler.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\runtime.win10-x86.Microsoft.Net.Native.Compiler.2.2.1\build\runtime.win10-x86.Microsoft.Net.Native.Compiler.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Net.Native.Compiler.2.2.1\build\Microsoft.Net.Native.Compiler.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Native.Compiler.2.2.1\build\Microsoft.Net.Native.Compiler.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Net.Native.Compiler.2.2.1\build\Microsoft.Net.Native.Compiler.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Native.Compiler.2.2.1\build\Microsoft.Net.Native.Compiler.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.ML.CpuMath.0.11.0\build\netstandard2.0\Microsoft.ML.CpuMath.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.CpuMath.0.11.0\build\netstandard2.0\Microsoft.ML.CpuMath.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.ML.0.11.0\build\netstandard2.0\Microsoft.ML.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.0.11.0\build\netstandard2.0\Microsoft.ML.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.ML.0.11.0\build\netstandard2.0\Microsoft.ML.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.0.11.0\build\netstandard2.0\Microsoft.ML.targets'))" />
   </Target>
   <Import Project="..\packages\runtime.win10-arm.Microsoft.Net.Native.SharedLibrary.2.2.1\build\runtime.win10-arm.Microsoft.Net.Native.SharedLibrary.targets" Condition="Exists('..\packages\runtime.win10-arm.Microsoft.Net.Native.SharedLibrary.2.2.1\build\runtime.win10-arm.Microsoft.Net.Native.SharedLibrary.targets')" />
   <Import Project="..\packages\runtime.win10-arm.Microsoft.Net.Native.Compiler.2.2.1\build\runtime.win10-arm.Microsoft.Net.Native.Compiler.targets" Condition="Exists('..\packages\runtime.win10-arm.Microsoft.Net.Native.Compiler.2.2.1\build\runtime.win10-arm.Microsoft.Net.Native.Compiler.targets')" />
@@ -349,6 +413,7 @@
   <Import Project="..\packages\runtime.win10-x86.Microsoft.Net.Native.SharedLibrary.2.2.1\build\runtime.win10-x86.Microsoft.Net.Native.SharedLibrary.targets" Condition="Exists('..\packages\runtime.win10-x86.Microsoft.Net.Native.SharedLibrary.2.2.1\build\runtime.win10-x86.Microsoft.Net.Native.SharedLibrary.targets')" />
   <Import Project="..\packages\runtime.win10-x86.Microsoft.Net.Native.Compiler.2.2.1\build\runtime.win10-x86.Microsoft.Net.Native.Compiler.targets" Condition="Exists('..\packages\runtime.win10-x86.Microsoft.Net.Native.Compiler.2.2.1\build\runtime.win10-x86.Microsoft.Net.Native.Compiler.targets')" />
   <Import Project="..\packages\Microsoft.Net.Native.Compiler.2.2.1\build\Microsoft.Net.Native.Compiler.targets" Condition="Exists('..\packages\Microsoft.Net.Native.Compiler.2.2.1\build\Microsoft.Net.Native.Compiler.targets')" />
+  <Import Project="..\packages\Microsoft.ML.0.11.0\build\netstandard2.0\Microsoft.ML.targets" Condition="Exists('..\packages\Microsoft.ML.0.11.0\build\netstandard2.0\Microsoft.ML.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

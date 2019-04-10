@@ -7,25 +7,24 @@ namespace SpottyTry2.Models
 {
     public class AdvTrack:PlayCreate
     {
-        public bool Advanced { get; set; }
-        public float? Acousticness { get; set; }
-        public string Analysis_url { get; set; }
         public float? Danceability { get; set; }
-        public int? Duration_ms { get; set; }
         public float? Energy { get; set; }
-        public string Id { get; set; }
-        public float? Instrumentalness { get; set; }
         public int? Key { get; set; }
-        public float? Liveness { get; set; }
-        public float? Loudness { get; set; }
         public int? Mode { get; set; }
+        public float? Loudness { get; set; }
         public float? Speechiness { get; set; }
-        public float? Tempo { get; set; }
-        public int? Time_signature { get; set; }
-        public string Track_href { get; set; }
-        public string Type { get; set; }
-        public string Uri { get; set; }
+        public float? Acousticness { get; set; }
+        public float? Instrumentalness { get; set; }
+        public float? Liveness { get; set; }
         public float? Valence { get; set; }
+        public float? Tempo { get; set; }
+        public string Type { get; set; }
+        public string Id { get; set; }
+        public string Uri { get; set; }
+        public string Track_href { get; set; }
+        public string Analysis_url { get; set; }
+        public int? Duration_ms { get; set; }
+        public int? Time_signature { get; set; }
 
         /*
          *  acousticness	float	A confidence measure from 0.0 to 1.0 of whether the track is acoustic. 1.0 represents high confidence the track is acoustic.

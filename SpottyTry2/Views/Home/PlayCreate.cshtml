@@ -40,7 +40,7 @@
         $("#weAreTheRobots").show();
         $.ajax({
             type: "GET",
-            url: "/ML/GetPlaylist",
+            url: "/Home/GetMlRecs",
             success: function (test) {
                 $("#weAreTheRobots").html(test);
             }

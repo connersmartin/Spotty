@@ -19,6 +19,7 @@ namespace SpottyTry2.Controllers
 {
     public class HomeController : Controller
     {
+        
         public ActionResult Index()
         {
             //now that we pass in the authorization we should be able to get things started
@@ -92,12 +93,9 @@ namespace SpottyTry2.Controllers
                 try
                 {
                     //get the playlist detail
-                    var getPlaylist = await SpotApi(HttpMethod.Get, pList.Href);
-                    
-                    var list = JsonConvert.DeserializeObject<SpotList>(getPlaylist);
 
-                    //get the track detail
-                    var getTracks = list.Tracks.Items;
+
+                    var getTracks = await GetPlaylistTracks(pList.Href);
 
                     foreach (var t in getTracks)
                     {
@@ -166,6 +164,32 @@ namespace SpottyTry2.Controllers
             return View("ViewPlaylist", JsonConvert.DeserializeObject<SpotList>(getPlaylist));
         }
 
+        //returns array of playlist items
+        public async Task<PlaylistItems[]> GetPlaylistTracks(string href)
+        {
+            var getPlaylist = await SpotApi(HttpMethod.Get, href);
+
+            var list = JsonConvert.DeserializeObject<SpotList>(getPlaylist);
+
+            //get the track detail
+            return list.Tracks.Items;
+        }
+
+        public async Task<List<AdvTrack>> GetAudioFeatures(string[] trackIds)
+        {
+            var t = string.Join(",", trackIds);
+            var res = await SpotApi(HttpMethod.Get, "https://api.spotify.com/v1/audio-features/",
+                new Dictionary<string, string>()
+                {
+                    {"ids", t}
+                });
+
+            var conv = JsonConvert.DeserializeObject<Dictionary<string,AdvTrack[]>>(res).Values.FirstOrDefault();
+
+        
+            return conv.ToList() ;
+        }
+
         //Gets the current user id for playlist creation
         public async Task<ActionResult> CurrentUser()
         {
@@ -175,6 +199,31 @@ namespace SpottyTry2.Controllers
             var g = await GetCurrentGenres();
             
             return PartialView("_AdvTrackFeatures", new AdvTrack() { UserId=user.Id.ToString(), Genres = g});
+        }
+
+        public async Task<ActionResult> GetMlRecs()
+        {
+            //get a playlist
+            //try March 2019
+            var listitemTest = await GetPlaylistTracks("https://api.spotify.com/v1/playlists/5h9qlv28tzvKGS3zuVSFAE");
+            //get tracks
+            var blah = new string[listitemTest.Length];
+            var i = 0;
+            foreach (var t in listitemTest)
+            {
+                blah[i] = t.Track.Id;
+                i++;
+            }
+
+            var fun = await GetAudioFeatures(blah);
+
+            //run through recommendation
+
+            var b = Ml.Predict(fun, fun);
+                
+
+            //return playlist
+            return RedirectToAction("ViewPlaylist", new { href = "" });
         }
 
 
