@@ -130,7 +130,6 @@ namespace SpottyTry2.Controllers
             //https://api.spotify.com/v1/recommendations/available-genre-seeds
             //https://api.spotify.com/v1/recommendations
             //using artists/genre seeds
-            var res = new SpotList();
             //get tracks to populate the playlist with
             var tracks = await PopulatePlaylist(playCreate);
             
@@ -202,32 +201,6 @@ namespace SpottyTry2.Controllers
             
             return PartialView("_AdvTrackFeatures", new AdvTrack() { UserId=user.Id.ToString(), Genres = g});
         }
-
-        public async Task<ActionResult> GetMlRecs()
-        {
-            //get a playlist
-            //try March 2019
-            var listitemTest = await GetPlaylistTracks("https://api.spotify.com/v1/playlists/5h9qlv28tzvKGS3zuVSFAE");
-            //get tracks
-            var blah = new string[listitemTest.Length];
-            var i = 0;
-            foreach (var t in listitemTest)
-            {
-                blah[i] = t.Track.Id;
-                i++;
-            }
-
-            var fun = await GetAudioFeatures(blah);
-
-            //run through recommendation
-
-            var b = Ml.Predict(fun, fun);
-                
-
-            //return playlist
-            return RedirectToAction("ViewPlaylist", new { href = "" });
-        }
-
 
         //Creates the new playlist
         public async Task<SpotList> CreateNewPlaylist(PlayCreate playCreate)
@@ -330,7 +303,7 @@ namespace SpottyTry2.Controllers
             return chosen.Id;
         }
 
-        //Param Dictionary Builder
+        //Param Dictionary Builder, could also use max/min instead of target
         public async Task<Dictionary<string,string>> BuildRecParamDict(AdvTrack a)
         {
             var paramDict = new Dictionary<string, string>(){{"limit", "100" }};
@@ -424,5 +397,45 @@ namespace SpottyTry2.Controllers
                 throw;
             }
         }
+
+        //Does not work, needs a lot of work
+        public async Task<ActionResult> GetMlRecs()
+        {
+            //get a playlist
+            //try March 2019
+            var listitemTest = await GetPlaylistTracks("https://api.spotify.com/v1/playlists/5h9qlv28tzvKGS3zuVSFAE");
+            //get tracks
+            var blah = new string[listitemTest.Length];
+            var i = 0;
+            foreach (var t in listitemTest)
+            {
+                blah[i] = t.Track.Id;
+                i++;
+            }
+
+            var fun = await GetAudioFeatures(blah);
+
+            var listitemTestA = await GetPlaylistTracks("https://api.spotify.com/v1/playlists/0q8gYT2lebXYpRnoqpyGFa");
+            //get tracks
+            var blahA = new string[listitemTestA.Length];
+            var j = 0;
+            foreach (var t in listitemTestA)
+            {
+                blahA[j] = t.Track.Id;
+                j++;
+            }
+
+            var funA = await GetAudioFeatures(blah);
+
+            //run through recommendation
+
+            var b = Ml.Predict(fun, funA);
+
+
+            //return playlist
+            return RedirectToAction("ViewPlaylist", new { href = "" });
+        }
+
+
     }
 }
