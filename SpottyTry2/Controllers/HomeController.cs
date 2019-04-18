@@ -14,107 +14,65 @@ using SpottyTry2.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-
 namespace SpottyTry2.Controllers
 {
     public class HomeController : Controller
     {
-        
+        //Actual page stuff
+        #region Actions
         public ActionResult Index()
         {
             //now that we pass in the authorization we should be able to get things started
             return View();
         }
 
-        //Assists in authorization
-        public async Task<RedirectResult> Spotify()
-        {
-            //Not running this through API function since we require a specific response on this
-            HttpClient rest = new HttpClient();
-            try
-            {
-                // TODO parameterize this to use config values
-                HttpResponseMessage response = await rest.GetAsync("https://accounts.spotify.com/authorize?client_id=fa659689165644618ef6368f3d2927b2&scope=playlist-modify-public&response_type=code&redirect_uri=http://localhost:21722/Home/TokenGrabber");
-
-                return Redirect(response.RequestMessage.RequestUri.ToString());
-
-            }
-            catch (System.Exception)
-            {
-
-                throw;
-            }
-
-        }
-
-        //Gets the token from the spotify redirect and auths
-        public async Task<ActionResult> TokenGrabber()
-        {
-            //TODO Parameterize this shit for config
-            var paramDict = new Dictionary<string, string>();
-
-            var tokenResponse = HttpContext.Request.QueryString;
-
-            paramDict.Add("client_id", "fa659689165644618ef6368f3d2927b2");
-            paramDict.Add("client_secret", "d13f94fafb0c468f98a30961a5c5b468");
-            paramDict.Add("grant_type", "authorization_code");
-            paramDict.Add("redirect_uri", "http://localhost:21722/Home/TokenGrabber");
-            paramDict.Add("code", tokenResponse["code"]);
-
-
-            var postString = "https://accounts.spotify.com/api/token";
-
-            var auth = await SpotApi(HttpMethod.Post, postString, paramDict);
-
-            SpotAuth r = JsonConvert.DeserializeObject<SpotAuth>(auth.ToString());
-
-            Session["SpotToke"] = r.access_token;
-
-            return RedirectToAction("Index");
-
-        }
-
         //Gets current users playlists
-        //TODO try and cache this
         public async Task<ActionResult> CurrentPlaylist()
         {
-            var playlists = new List<SimplePlaylist>();
+            const string playlistCache = "Playlist";
 
-            string getString = "https://api.spotify.com/v1/me/playlists";
-
-            var playlist = await SpotApi(HttpMethod.Get, getString);
-            //gets playlists
-            var res = JsonConvert.DeserializeObject<ListResponse>(playlist.ToString());
-
-            //then get individual playlists to a list using a get on each playlist
-            foreach (var pList in res.Items)
+            List<SimplePlaylist> playlists = CacheLayer.Get<List<SimplePlaylist>>(playlistCache);
+            if (playlists == null)
             {
-                var pLength = 0;
-                try
+                playlists = new List<SimplePlaylist>();
+                string getString = "https://api.spotify.com/v1/me/playlists";
+
+                var playlist = await SpotApi(HttpMethod.Get, getString);
+                //gets playlists
+                var res = JsonConvert.DeserializeObject<ListResponse>(playlist.ToString());
+
+                //then get individual playlists to a list using a get on each playlist
+                foreach (var pList in res.Items)
                 {
-                    //get the playlist detail
-
-
-                    var getTracks = await GetPlaylistTracks(pList.Href);
-
-                    foreach (var t in getTracks)
+                    var pLength = 0;
+                    try
                     {
-                        pLength += t.Track.Duration_Ms;
+                        //get the playlist detail
+
+
+                        var getTracks = await GetPlaylistTracks(pList.Href);
+
+                        foreach (var t in getTracks)
+                        {
+                            pLength += t.Track.Duration_Ms;
+                        }
+                        playlists.Add(new SimplePlaylist
+                        {
+                            Name = pList.Name,
+                            Count = pList.Tracks.Total,
+                            Length = pLength / 60000,
+                            Id = pList.Id
+                        });
                     }
-                    playlists.Add(new SimplePlaylist
+                    catch (Exception e)
                     {
-                        Name = pList.Name,
-                        Count = pList.Tracks.Total,
-                        Length = pLength / 60000,
-                        Id = pList.Id
-                    });
+                        Console.WriteLine(e);
+                        throw;
+                    }
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
+                CacheLayer.Add(playlists, playlistCache);
             }
+            
             return PartialView("_CurrentPlaylists", playlists);
    
         }
@@ -148,23 +106,56 @@ namespace SpottyTry2.Controllers
                
                 var response = await SpotApi(HttpMethod.Post, url);
             }
-            //grab the finished playlist
-           
-            //TODO figure out what the hell to do here
-            //The idea is to show the tracks
+
             return RedirectToAction("ViewPlaylist","Home", new { href = playlist.Id });
         }
 
-        //Reusable View playlist function
+        //Gets some info for playlist creation and caches it
+        public async Task<ActionResult> PlayCreate()
+        {
+            //gets the id of the user
+            const string userCache = "User";
+            const string genreCache = "Genre";
+
+            User user = CacheLayer.Get<User>(userCache);
+            List<SelectListItem> genre = CacheLayer.Get<List<SelectListItem>>(genreCache);
+
+            if (user == null)
+            {
+                user = await GetCurrentUser();
+                CacheLayer.Add(user, userCache);
+            }
+            //gets currently available genres TODO Cache this
+            if (genre == null)
+            {
+                genre = await GetCurrentGenres();
+                CacheLayer.Add(genre, genreCache);
+            }
+
+            return PartialView("_AdvTrackFeatures", new AdvTrack() { UserId = user.Id.ToString(), Genres = genre });
+        }
+
+        //Reusable View playlist function caches playlist
         public async Task<ActionResult> ViewPlaylist(string href)
         {
-            var getPlaylist = await SpotApi(HttpMethod.Get, "https://api.spotify.com/v1/playlists/"+href);
+            const string playlistDetailCache = "PlaylistDetailCache";
 
+            string getPlaylist = CacheLayer.Get<string>(playlistDetailCache+href);
+
+            if (getPlaylist==null)
+            {
+                getPlaylist = await SpotApi(HttpMethod.Get, "https://api.spotify.com/v1/playlists/"+href);
+                CacheLayer.Add(getPlaylist, playlistDetailCache + href);
+            }
+               
             var m = JsonConvert.DeserializeObject<SpotList>(getPlaylist);
 
             return View("ViewPlaylist",m );
         }
+        #endregion
 
+        //Logic for the playlist creation
+        #region Work
         //returns array of playlist items
         public async Task<PlaylistItems[]> GetPlaylistTracks(string href)
         {
@@ -176,6 +167,7 @@ namespace SpottyTry2.Controllers
             return list.Tracks.Items;
         }
 
+        //gets the audio features for an array of tracks
         public async Task<List<AdvTrack>> GetAudioFeatures(string[] trackIds)
         {
             var t = string.Join(",", trackIds);
@@ -190,18 +182,7 @@ namespace SpottyTry2.Controllers
         
             return conv.ToList() ;
         }
-
-        //Gets the current user id for playlist creation
-        public async Task<ActionResult> CurrentUser()
-        {
-            //gets the id of the user
-            var user = await GetCurrentUser();
-            //gets currently available genres
-            var g = await GetCurrentGenres();
-            
-            return PartialView("_AdvTrackFeatures", new AdvTrack() { UserId=user.Id.ToString(), Genres = g});
-        }
-
+ 
         //Creates the new playlist
         public async Task<SpotList> CreateNewPlaylist(PlayCreate playCreate)
         {
@@ -213,37 +194,6 @@ namespace SpottyTry2.Controllers
             var playlist = await SpotApi(HttpMethod.Post, postString, paramDict, true);
             //creates new playlist
             return JsonConvert.DeserializeObject<SpotList>(playlist);
-        }
-
-        //Gets current user id to make playlist
-        public async Task<User> GetCurrentUser()
-        {
-            var getString = "https://api.spotify.com/v1/me";
-
-            var res = await SpotApi(HttpMethod.Get, getString);
-
-            return JsonConvert.DeserializeObject<User>(res);
-        }
-
-        //Gets current genre seeds
-        public async Task<List<SelectListItem>> GetCurrentGenres()
-        {
-            var getString = "https://api.spotify.com/v1/recommendations/available-genre-seeds";
-
-            var res = await SpotApi(HttpMethod.Get, getString);
-
-            var j = JsonConvert.DeserializeObject<GenreList>(res);
-
-            var g = new List<SelectListItem>(){
-                new SelectListItem(){Text="Select a genre", Value="",Selected=true }
-            };
-
-            foreach (var sl in j.Genres)
-            {
-                g.Add(new SelectListItem() { Text = sl, Value = sl });
-            }
-
-            return g;
         }
 
         //Gets tracks to populate a playlist
@@ -303,6 +253,43 @@ namespace SpottyTry2.Controllers
             return chosen.Id;
         }
 
+        //Gets current genre seeds
+        public async Task<List<SelectListItem>> GetCurrentGenres()
+        {
+            var getString = "https://api.spotify.com/v1/recommendations/available-genre-seeds";
+
+            var res = await SpotApi(HttpMethod.Get, getString);
+
+            var j = JsonConvert.DeserializeObject<GenreList>(res);
+
+            var g = new List<SelectListItem>(){
+                new SelectListItem(){Text="Select a genre", Value="",Selected=true }
+            };
+
+            foreach (var sl in j.Genres)
+            {
+                g.Add(new SelectListItem() { Text = sl, Value = sl });
+            }
+
+            return g;
+        }
+
+        //Gets current user id to make playlist
+        public async Task<User> GetCurrentUser()
+        {
+            var getString = "https://api.spotify.com/v1/me";
+
+            var res = await SpotApi(HttpMethod.Get, getString);
+
+            return JsonConvert.DeserializeObject<User>(res);
+        }
+
+        
+        #endregion
+
+        //Helper functions for Spotify API
+        #region Helpers
+
         //Param Dictionary Builder, could also use max/min instead of target
         public async Task<Dictionary<string,string>> BuildRecParamDict(AdvTrack a)
         {
@@ -324,7 +311,6 @@ namespace SpottyTry2.Controllers
 
             return paramDict;
         }
-
         //Param string builder
         public string BuildParamString(Dictionary<string, string> param)
         {
@@ -340,7 +326,6 @@ namespace SpottyTry2.Controllers
         //Generic API method
         public async Task<string> SpotApi(HttpMethod httpMethod, string url, Dictionary<string, string> param = null, bool json = false)
         {
-            var auth = new KeyValuePair<string, string>("Authorization", "Bearer " + Session["SpotToke"]);
 
             try
             {
@@ -350,6 +335,8 @@ namespace SpottyTry2.Controllers
 
                 if (url != "https://accounts.spotify.com/api/token")
                 {
+                    var auth = new KeyValuePair<string, string>("Authorization", "Bearer " + Session["SpotToke"]);
+
                     rest.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(auth.Key, auth.Value);
                 }
 
@@ -397,7 +384,9 @@ namespace SpottyTry2.Controllers
                 throw;
             }
         }
-
+        #endregion
+        
+        
         //Does not work, needs a lot of work
         public async Task<ActionResult> GetMlRecs()
         {

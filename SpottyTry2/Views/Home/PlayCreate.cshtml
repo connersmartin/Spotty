@@ -27,7 +27,7 @@
         $("#weAreTheRobots").hide();
         $.ajax({
             type: "GET",
-            url: "/Home/CurrentUser",
+            url: "/Home/PlayCreate",
             success: function (test) {
                 $("#createPlaylist").html(test);
             }
