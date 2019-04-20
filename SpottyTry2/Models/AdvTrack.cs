@@ -18,14 +18,44 @@ namespace SpottyTry2.Models
         public float? Liveness { get; set; }
         public float? Valence { get; set; }
         public float? Tempo { get; set; }
+        public int? Duration_ms { get; set; }
+        public int? Time_signature { get; set; }
+        public string Analysis_url { get; set; }
+        public bool Advanced { get; set; }
         public string Type { get; set; }
         public string Id { get; set; }
         public string Uri { get; set; }
         public string Track_href { get; set; }
-        public string Analysis_url { get; set; }
-        public int? Duration_ms { get; set; }
-        public int? Time_signature { get; set; }
-        public bool Advanced { get; set; }
+
+        //min
+        public float? MinDanceability { get; set; }
+        public float? MinEnergy { get; set; }
+        public int? MinKey { get; set; }
+        public int? MinMode { get; set; }
+        public float? MinLoudness { get; set; }
+        public float? MinSpeechiness { get; set; }
+        public float? MinAcousticness { get; set; }
+        public float? MinInstrumentalness { get; set; }
+        public float? MinLiveness { get; set; }
+        public float? MinValence { get; set; }
+        public float? MinTempo { get; set; }
+        public int? MinDuration_ms { get; set; }
+        public int? MinTime_signature { get; set; }
+        //max
+        public float? MaxDanceability { get; set; }
+        public float? MaxEnergy { get; set; }
+        public int? MaxKey { get; set; }
+        public int? MaxMode { get; set; }
+        public float? MaxLoudness { get; set; }
+        public float? MaxSpeechiness { get; set; }
+        public float? MaxAcousticness { get; set; }
+        public float? MaxInstrumentalness { get; set; }
+        public float? MaxLiveness { get; set; }
+        public float? MaxValence { get; set; }
+        public float? MaxTempo { get; set; }
+        public int? MaxDuration_ms { get; set; }
+        public int? MaxTime_signature { get; set; }
+
 
         /*
          *  acousticness	float	A confidence measure from 0.0 to 1.0 of whether the track is acoustic. 1.0 represents high confidence the track is acoustic.

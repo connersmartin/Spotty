@@ -29,12 +29,8 @@ namespace SpottyTry2.Controllers
         //Gets current users playlists
         public async Task<ActionResult> CurrentPlaylist()
         {
-            const string playlistCache = "Playlist";
 
-            List<SimplePlaylist> playlists = CacheLayer.Get<List<SimplePlaylist>>(playlistCache);
-            if (playlists == null)
-            {
-                playlists = new List<SimplePlaylist>();
+                var playlists = new List<SimplePlaylist>();
                 string getString = "https://api.spotify.com/v1/me/playlists";
 
                 var playlist = await SpotApi(HttpMethod.Get, getString);
@@ -42,37 +38,36 @@ namespace SpottyTry2.Controllers
                 var res = JsonConvert.DeserializeObject<ListResponse>(playlist.ToString());
 
                 //then get individual playlists to a list using a get on each playlist
-                foreach (var pList in res.Items)
+            foreach (var pList in res.Items)
+            {
+                var pLength = 0;
+                try
                 {
-                    var pLength = 0;
-                    try
+                    //get the playlist detail
+
+
+                    var getTracks = await GetPlaylistTracks(pList.Href);
+
+                    foreach (var t in getTracks)
                     {
-                        //get the playlist detail
-
-
-                        var getTracks = await GetPlaylistTracks(pList.Href);
-
-                        foreach (var t in getTracks)
-                        {
-                            pLength += t.Track.Duration_Ms;
-                        }
-                        playlists.Add(new SimplePlaylist
-                        {
-                            Name = pList.Name,
-                            Count = pList.Tracks.Total,
-                            Length = pLength / 60000,
-                            Id = pList.Id
-                        });
+                        pLength += t.Track.Duration_Ms;
                     }
-                    catch (Exception e)
+
+                    playlists.Add(new SimplePlaylist
                     {
-                        Console.WriteLine(e);
-                        throw;
-                    }
+                        Name = pList.Name,
+                        Count = pList.Tracks.Total,
+                        Length = pLength / 60000,
+                        Id = pList.Id
+                    });
                 }
-                CacheLayer.Add(playlists, playlistCache);
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
-            
+
             return PartialView("_CurrentPlaylists", playlists);
    
         }
@@ -114,18 +109,12 @@ namespace SpottyTry2.Controllers
         public async Task<ActionResult> PlayCreate()
         {
             //gets the id of the user
-            const string userCache = "User";
             const string genreCache = "Genre";
 
-            User user = CacheLayer.Get<User>(userCache);
             List<SelectListItem> genre = CacheLayer.Get<List<SelectListItem>>(genreCache);
-
-            if (user == null)
-            {
-                user = await GetCurrentUser();
-                CacheLayer.Add(user, userCache);
-            }
-            //gets currently available genres TODO Cache this
+            var  user = await GetCurrentUser();
+            
+            //gets currently available genres
             if (genre == null)
             {
                 genre = await GetCurrentGenres();
@@ -135,19 +124,12 @@ namespace SpottyTry2.Controllers
             return PartialView("_AdvTrackFeatures", new AdvTrack() { UserId = user.Id.ToString(), Genres = genre });
         }
 
-        //Reusable View playlist function caches playlist
+        //Reusable View playlist function
         public async Task<ActionResult> ViewPlaylist(string href)
         {
-            const string playlistDetailCache = "PlaylistDetailCache";
 
-            string getPlaylist = CacheLayer.Get<string>(playlistDetailCache+href);
+            var getPlaylist = await SpotApi(HttpMethod.Get, "https://api.spotify.com/v1/playlists/"+href);
 
-            if (getPlaylist==null)
-            {
-                getPlaylist = await SpotApi(HttpMethod.Get, "https://api.spotify.com/v1/playlists/"+href);
-                CacheLayer.Add(getPlaylist, playlistDetailCache + href);
-            }
-               
             var m = JsonConvert.DeserializeObject<SpotList>(getPlaylist);
 
             return View("ViewPlaylist",m );
@@ -284,6 +266,31 @@ namespace SpottyTry2.Controllers
             return JsonConvert.DeserializeObject<User>(res);
         }
 
+        //TODO
+        public async Task<Object> GetRecsFromPlaylist()
+        {
+            //analyze each track in a playlist
+            //send to recommendationengine
+
+            //Grab 10 recs for each artist and try to line them up with the analysis RecommendationEngine
+            
+            return string.Empty;
+        }
+
+        //TODO 
+        public object RecommendationEngine()
+        {
+            //Figure out how to analyze the tracks
+            //would need standard deviation, mean, etc
+            //Would pass in advtrack data
+
+            //start with averages
+            //then add in some noticeable outliers
+        
+
+
+            return string.Empty;
+        }
         
         #endregion
 
