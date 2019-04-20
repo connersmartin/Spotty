@@ -27,7 +27,7 @@ namespace SpottyTry2.Controllers
             try
             {
                 // TODO parameterize this to use config values
-                HttpResponseMessage response = await rest.GetAsync("https://accounts.spotify.com/authorize?client_id=fa659689165644618ef6368f3d2927b2&scope=playlist-modify-public&response_type=code&redirect_uri=http://localhost:21722/Auth/TokenGrabber");
+                HttpResponseMessage response = await rest.GetAsync("https://accounts.spotify.com/authorize?client_id=fa659689165644618ef6368f3d2927b2&scope=playlist-modify-public%20playlist-modify-private%20playlist-read-private&response_type=code&redirect_uri=http://localhost:21722/Auth/TokenGrabber");
 
                 return Redirect(response.RequestMessage.RequestUri.ToString());
 

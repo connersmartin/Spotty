@@ -27,25 +27,29 @@ namespace SpottyTry2.Controllers
         }
 
         //Gets current users playlists
+        //stretch goal pagination
         public async Task<ActionResult> CurrentPlaylist()
         {
 
-                var playlists = new List<SimplePlaylist>();
-                string getString = "https://api.spotify.com/v1/me/playlists";
+            var playlists = new List<SimplePlaylist>();
+            string getString = "https://api.spotify.com/v1/me/playlists";
 
-                var playlist = await SpotApi(HttpMethod.Get, getString);
-                //gets playlists
-                var res = JsonConvert.DeserializeObject<ListResponse>(playlist.ToString());
+            var paramDict = new Dictionary<string, string>()
+            {
+                {"limit","50" }
+            };
 
-                //then get individual playlists to a list using a get on each playlist
+            var playlist = await SpotApi(HttpMethod.Get, getString,paramDict);
+            //gets playlists
+            var res = JsonConvert.DeserializeObject<ListResponse>(playlist.ToString());
+
+            //then get individual playlists to a list using a get on each playlist
             foreach (var pList in res.Items)
             {
                 var pLength = 0;
                 try
                 {
-                    //get the playlist detail
-
-
+                    //get the playlist detail just for length
                     var getTracks = await GetPlaylistTracks(pList.Href);
 
                     foreach (var t in getTracks)
@@ -89,21 +93,12 @@ namespace SpottyTry2.Controllers
             //create playlist after getting tracks in case there is an error
             var playlist = await CreateNewPlaylist(playCreate);
 
-            var postString = string.Format("https://api.spotify.com/v1/playlists/{0}/tracks", playlist.Id);
-            //add the tracks
-            foreach (var t in tracks)
-            {
-                var paramDict = new Dictionary<string,string>()
-                {
-                    {"uris",t.Uri }
-                };
-                var url = postString +"?"+ BuildParamString(paramDict);
-               
-                var response = await SpotApi(HttpMethod.Post, url);
-            }
+            AddTracksToPlaylist(tracks, playlist.Id);
 
             return RedirectToAction("ViewPlaylist","Home", new { href = playlist.Id });
         }
+
+        
 
         //Gets some info for playlist creation and caches it
         public async Task<ActionResult> PlayCreate()
@@ -138,7 +133,11 @@ namespace SpottyTry2.Controllers
 
         //Logic for the playlist creation
         #region Work
-        //returns array of playlist items
+        /// <summary>
+        /// GETS The Info needed for all the tracks in a given playlist
+        /// </summary>
+        /// <param name="href">The full href of the playlist</param>
+        /// <returns>Array of PlaylistItems</returns>
         public async Task<PlaylistItems[]> GetPlaylistTracks(string href)
         {
             var getPlaylist = await SpotApi(HttpMethod.Get, href);
@@ -148,8 +147,12 @@ namespace SpottyTry2.Controllers
             //get the track detail
             return list.Tracks.Items;
         }
-
-        //gets the audio features for an array of tracks
+        
+        /// <summary>
+        /// GETS the advanced audio features of tracks
+        /// </summary>
+        /// <param name="trackIds">Array of IDs from tracks</param>
+        /// <returns>List of advanced track features</returns>
         public async Task<List<AdvTrack>> GetAudioFeatures(string[] trackIds)
         {
             var t = string.Join(",", trackIds);
@@ -165,7 +168,11 @@ namespace SpottyTry2.Controllers
             return conv.ToList() ;
         }
  
-        //Creates the new playlist
+        /// <summary>
+        /// POSTS a new playlist
+        /// </summary>
+        /// <param name="playCreate">Info from view to create the playlist</param>
+        /// <returns>Playlist object</returns>
         public async Task<SpotList> CreateNewPlaylist(PlayCreate playCreate)
         {
             var paramDict = new Dictionary<string, string>()
@@ -178,8 +185,12 @@ namespace SpottyTry2.Controllers
             return JsonConvert.DeserializeObject<SpotList>(playlist);
         }
 
-        //Gets tracks to populate a playlist
-        public async Task<List<Track>> PopulatePlaylist(AdvTrack playCreate)
+        /// <summary>
+        /// GETS tracks recommended by spotify based on the supplied criteria
+        /// </summary>
+        /// <param name="playCreate">Playlist info</param>
+        /// <returns>List of track objects</returns>
+        public async Task<List<Track>> PopulatePlaylist(AdvTrack playCreate, int limit = 0)
         {
            
             //set a default length
@@ -193,19 +204,36 @@ namespace SpottyTry2.Controllers
             var res = await SpotApi(HttpMethod.Get, getString, paramDict);
 
             var list = JsonConvert.DeserializeObject<SeedResult>(res).Tracks.ToList();
-
-            foreach (var l in list)
+            if (limit == 0)
             {
-                if (totalTime>0)
+                foreach (var l in list)
                 {
-                    trackList.Add(l);
+                    if (totalTime>0)
+                    {
+                        trackList.Add(l);
+                    }
+                    totalTime -= l.Duration_Ms;
                 }
-                totalTime -= l.Duration_Ms;
+            }
+            else
+            {
+                foreach (var l in list)
+                {
+                    if (limit>0)
+                    {
+                        trackList.Add(l);
+                    }
+                    limit--;
+                }
             }
             return trackList;
         }
 
-        //Get an artist id based on text search
+        /// <summary>
+        /// GETS a single artist based on search params
+        /// </summary>
+        /// <param name="artistSeed">Name of an artist (exact)</param>
+        /// <returns>Artist object's id</returns>
         public async Task<string> GetSingleArtist(string artistSeed)
         {
             var artDict = new Dictionary<string, string>()
@@ -235,7 +263,31 @@ namespace SpottyTry2.Controllers
             return chosen.Id;
         }
 
-        //Gets current genre seeds
+        /// <summary>
+        /// POSTS tracks to a given playlist
+        /// </summary>
+        /// <param name="tracks">Track objects</param>
+        /// <param name="id">Playlist ID</param>
+        private async void AddTracksToPlaylist(List<Track> tracks, string id)
+        {
+            var postString = string.Format("https://api.spotify.com/v1/playlists/{0}/tracks", id);
+            //add the tracks
+            foreach (var t in tracks)
+            {
+                var paramDict = new Dictionary<string, string>()
+                {
+                    {"uris",t.Uri }
+                };
+                var url = postString + "?" + BuildParamString(paramDict);
+
+                var response = await SpotApi(HttpMethod.Post, url);
+            }
+        }
+
+        /// <summary>
+        /// GETS the current available genre list (cached)
+        /// </summary>
+        /// <returns>List of SelectListItems to populate drop own menu</returns>
         public async Task<List<SelectListItem>> GetCurrentGenres()
         {
             var getString = "https://api.spotify.com/v1/recommendations/available-genre-seeds";
@@ -256,7 +308,10 @@ namespace SpottyTry2.Controllers
             return g;
         }
 
-        //Gets current user id to make playlist
+        /// <summary>
+        /// GETS the current users ID needed for playlist creation
+        /// </summary>
+        /// <returns>User object</returns>
         public async Task<User> GetCurrentUser()
         {
             var getString = "https://api.spotify.com/v1/me";
@@ -267,29 +322,80 @@ namespace SpottyTry2.Controllers
         }
 
         //TODO
-        public async Task<Object> GetRecsFromPlaylist()
+        public async Task<ActionResult> GetRecsFromPlaylist(string href)
         {
-            //analyze each track in a playlist
-            //send to recommendationengine
+            var trackRec = new AdvTrack();
+            var tempList = new List<Track>();
+            var user = await GetCurrentUser();
+            var listTracks = await GetPlaylistTracks("https://api.spotify.com/v1/playlists/5h9qlv28tzvKGS3zuVSFAE");
 
-            //Grab 10 recs for each artist and try to line them up with the analysis RecommendationEngine
+            var trackIds = new List<string>();
+            //analyze each track in a playlist
+            foreach (var t in listTracks)
+            {
+                trackIds.Add(t.Track.Id);
+            }
+            var audioFeat = await GetAudioFeatures(trackIds.ToArray());
+            //GetAudioFeatures
+            //send to recommendationengine
+            trackRec = RecommendationEngine(audioFeat);
+            //would be running Populateplaylist multiple times
+            foreach (var t in listTracks)
+            {
+                trackRec.Artist = t.Track.Artists.FirstOrDefault().Name;
+                //need to think of a better way to do this, want to prevent duplicates somehow
+                tempList.AddRange(await PopulatePlaylist(trackRec, 1));
+            }
+            var pc = new PlayCreate()
+            {
+                Name = "Test 3",
+                UserId = user.Id
+            };
+            var newList = await CreateNewPlaylist(pc);
+
+            AddTracksToPlaylist(tempList, newList.Id);
             
-            return string.Empty;
+            return RedirectToAction("ViewPlaylist", "Home", new { href = newList.Id }); ;
         }
 
         //TODO 
-        public object RecommendationEngine()
+        public AdvTrack RecommendationEngine(List<AdvTrack> advTracks)
         {
+            var math = new AdvTrack()
+            {
+                Instrumentalness = 0,
+                Liveness = 0,
+                Loudness = 0,
+                Energy = 0,
+                Danceability = 0,
+                Speechiness = 0,
+                Valence = 0
+            };
             //Figure out how to analyze the tracks
             //would need standard deviation, mean, etc
             //Would pass in advtrack data
-
+            foreach (var adv in advTracks)
+            {
+                math.Instrumentalness += adv.Instrumentalness;
+                math.Liveness += adv.Liveness;
+                math.Loudness += adv.Loudness;
+                math.Energy += adv.Energy;
+                math.Danceability += adv.Danceability;
+                math.Speechiness += adv.Speechiness;
+                math.Valence += adv.Valence;
+            }
             //start with averages
             //then add in some noticeable outliers
-        
 
+            math.Instrumentalness/=advTracks.Count;
+            math.Liveness /= advTracks.Count;
+            math.Loudness /= advTracks.Count;
+            math.Energy /= advTracks.Count;
+            math.Danceability /= advTracks.Count;
+            math.Speechiness /= advTracks.Count;
+            math.Valence /= advTracks.Count;
 
-            return string.Empty;
+            return math;
         }
         
         #endregion
