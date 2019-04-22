@@ -93,12 +93,46 @@ namespace SpottyTry2.Controllers
             //create playlist after getting tracks in case there is an error
             var playlist = await CreateNewPlaylist(playCreate);
 
-            AddTracksToPlaylist(tracks, playlist.Id);
+            var p = AddTracksToPlaylist(tracks, playlist.Id);
 
             return RedirectToAction("ViewPlaylist","Home", new { href = playlist.Id });
         }
 
-        
+       //Returns the Audio Feature info for a given Playlist/Album
+       public async Task<ActionResult> ViewFeatures(string href)
+        {
+            var testTrack = new List<AdvTrack>();
+            var res = await GetPlaylistTracks("https://api.spotify.com/v1/playlists/"+href);
+            var tracks = new List<string>();
+            foreach (var t in res)
+            {
+                tracks.Add(t.Track.Id);
+                testTrack.Add(new AdvTrack()
+                {
+                    Id = t.Track.Id,
+                    Artist = t.Track.Artists.FirstOrDefault().Name,
+                    Name = t.Track.Name
+                });
+            }
+
+
+
+            var advTracks = await GetAudioFeatures(tracks.ToArray());
+
+            foreach (var a in advTracks)
+            {
+                foreach (var t in testTrack)
+                {
+                    if (a.Id==t.Id)
+                    {
+                        a.Name = t.Name;
+                        a.Artist = t.Artist;
+                    }
+                }
+            }
+
+            return View("ViewFeatures", advTracks );
+        }
 
         //Gets some info for playlist creation and caches it
         public async Task<ActionResult> PlayCreate()
@@ -268,7 +302,7 @@ namespace SpottyTry2.Controllers
         /// </summary>
         /// <param name="tracks">Track objects</param>
         /// <param name="id">Playlist ID</param>
-        private async void AddTracksToPlaylist(List<Track> tracks, string id)
+        private async Task<string> AddTracksToPlaylist(List<Track> tracks, string id)
         {
             var postString = string.Format("https://api.spotify.com/v1/playlists/{0}/tracks", id);
             //add the tracks
@@ -282,6 +316,8 @@ namespace SpottyTry2.Controllers
 
                 var response = await SpotApi(HttpMethod.Post, url);
             }
+
+            return postString;
         }
 
         /// <summary>
@@ -327,7 +363,7 @@ namespace SpottyTry2.Controllers
             var trackRec = new AdvTrack();
             var tempList = new List<Track>();
             var user = await GetCurrentUser();
-            var listTracks = await GetPlaylistTracks("https://api.spotify.com/v1/playlists/5h9qlv28tzvKGS3zuVSFAE");
+            var listTracks = await GetPlaylistTracks("https://api.spotify.com/v1/playlists/2Ql3TagKirJQJDG93GqMiE");
 
             var trackIds = new List<string>();
             //analyze each track in a playlist
@@ -348,7 +384,7 @@ namespace SpottyTry2.Controllers
             }
             var pc = new PlayCreate()
             {
-                Name = "Test 3",
+                Name = "Test 4",
                 UserId = user.Id
             };
             var newList = await CreateNewPlaylist(pc);
@@ -358,7 +394,7 @@ namespace SpottyTry2.Controllers
             return RedirectToAction("ViewPlaylist", "Home", new { href = newList.Id }); ;
         }
 
-        //TODO 
+        //TODO Doesn't work with songs same artist
         public AdvTrack RecommendationEngine(List<AdvTrack> advTracks)
         {
             var math = new AdvTrack()

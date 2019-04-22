@@ -242,6 +242,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AdvTrack.cs" />
+    <Compile Include="Models\AdvTrackCalc.cs" />
     <Compile Include="Models\Album.cs" />
     <Compile Include="Models\Artist.cs" />
     <Compile Include="Models\ArtistFull.cs" />
@@ -321,6 +322,7 @@
     <Content Include="Views\Home\_NewPlaylist.cshtml" />
     <Content Include="Views\Home\ViewPlaylist.cshtml" />
     <Content Include="Views\Home\_AdvTrackFeatures.cshtml" />
+    <Content Include="Views\Home\ViewFeatures.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
