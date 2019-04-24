@@ -7,43 +7,79 @@ namespace SpottyTry2.Models
 {
     public class AdvTrackCalc
     {
-        float? TotDance {get; set;}
-        float? TotEnergy {get; set;}
-        int? TotKey {get; set;}
-        int? TotMode {get; set;}
-        float? TotLoudness {get; set;}
-        float? TotSpeechiness {get; set;}
-        float? TotAcousticness {get; set;}
-        float? TotInstrumentalness {get; set;}
-        float? TotLiveness {get; set;}
-        float? TotValence {get; set;}
-        float? TotTempo {get; set;}
-        int? TotDuration {get; set;}
-        float? AvgDance { get { return this.AvgDance; } set { AvgDance = TotDance / Total; }}
-        float? AvgEnergy { get; set; }
-        int? AvgKey { get; set; }
-        int? AvgMode { get; set; }
-        float? AvgLoudness { get; set; }
-        float? AvgSpeechiness { get; set; }
-        float? AvgAcousticness { get; set; }
-        float? AvgInstrumentalness { get; set; }
-        float? AvgLiveness { get; set; }
-        float? AvgValence { get; set; }
-        float? AvgTempo { get; set; }
-        int? AvgDuration { get; set; }
-        float? StdDance { get; set; }
-        float? StdEnergy { get; set; }
-        int? StdKey { get; set; }
-        int? StdMode { get; set; }
-        float? StdLoudness { get; set; }
-        float? StdSpeechiness { get; set; }
-        float? StdAcousticness { get; set; }
-        float? StdInstrumentalness { get; set; }
-        float? StdLiveness { get; set; }
-        float? StdValence { get; set; }
-        float? StdTempo { get; set; }
-        int? StdDuration { get; set; }
-        int? Total { get; set; }
+        public List<AdvTrack> Tracks { get; set; }
+        public float? TotDance {get; set;}
+        public float? TotEnergy {get; set;}
+        public int? TotKey {get; set;}
+        public int? TotMode {get; set;}
+        public float? TotLoudness {get; set;}
+        public float? TotSpeechiness {get; set;}
+        public float? TotAcousticness {get; set;}
+        public float? TotInstrumentalness {get; set;}
+        public float? TotLiveness {get; set;}
+        public float? TotValence {get; set;}
+        public float? TotTempo {get; set;}
+        public int? TotDuration {get; set;}
+        public List<float?> Dance { get; set; }
+        public List<float?> Energy { get; set; }
+        public List<int?> Key { get; set; }
+        public List<int?> Mode { get; set; }
+        public List<float?> Loudness { get; set; }
+        public List<float?> Speechiness { get; set; }
+        public List<float?> Acousticness { get; set; }
+        public List<float?> Instrumentalness { get; set; }
+        public List<float?> Liveness { get; set; }
+        public List<float?> Valence { get; set; }
+        public List<float?> Tempo { get; set; }
+        public List<int?> Duration { get; set; }
+        public float? StdDance { get; set; }
+        public float? StdEnergy { get; set; }
+        public int? StdKey { get; set; }
+        public int? StdMode { get; set; }
+        public float? StdLoudness { get; set; }
+        public float? StdSpeechiness { get; set; }
+        public float? StdAcousticness { get; set; }
+        public float? StdInstrumentalness { get; set; }
+        public float? StdLiveness { get; set; }
+        public float? StdValence { get; set; }
+        public float? StdTempo { get; set; }
+        public int? StdDuration { get; set; }
+        public float? AvgDance { get; set; }
+        public float? AvgEnergy { get; set; }
+        public int? AvgKey { get; set; }
+        public int? AvgMode { get; set; }
+        public float? AvgLoudness { get; set; }
+        public float? AvgSpeechiness { get; set; }
+        public float? AvgAcousticness { get; set; }
+        public float? AvgInstrumentalness { get; set; }
+        public float? AvgLiveness { get; set; }
+        public float? AvgValence { get; set; }
+        public float? AvgTempo { get; set; }
+        public int? AvgDuration { get; set; }
 
+        public int? Total { get; set; }
+
+        public double GetStdDev(float? avg, List<float?> val)
+        {
+            double std=0;
+
+            foreach (var v in val)
+            {
+                std += Math.Pow((double)v - (double)avg, 2);
+            }
+
+            return Math.Sqrt(std/val.Count);
+        }
+        public double GetStdDev(float? avg, List<int?> val)
+        {
+            double std = 0;
+
+            foreach (var v in val)
+            {
+                std += Math.Pow((double)v - (double)avg, 2);
+            }
+
+            return Math.Sqrt(std/val.Count);
+        }
     }
 }

@@ -1,91 +1,6 @@
-﻿@model List<SpottyTry2.Models.AdvTrack>
-@{ 
-    float? totDance = 0f;
-    float? totEnergy = 0f;
-    int? totKey = 0;
-    int? totMode = 0;
-    float? totLoudness = 0f;
-    float? totSpeechiness= 0f;
-    float? totAcousticness = 0f;
-    float? totInstrumentalness = 0f;
-    float? totLiveness = 0f;
-    float? totValence= 0f;
-    float? totTempo = 0f;
-    int? totDuration = 0;
-    float? stdDance = 0f;
-    float? stdEnergy = 0f;
-    int? stdKey = 0;
-    int? stdMode = 0;
-    float? stdLoudness = 0f;
-    float? stdSpeechiness= 0f;
-    float? stdAcousticness = 0f;
-    float? stdInstrumentalness = 0f;
-    float? stdLiveness = 0f;
-    float? stdValence= 0f;
-    float? stdTempo = 0f;
-    long? stdDuration = 0;
-    int c = Model.Count;
-
-    foreach (var track in Model)
-    {
-        totDance += track.Danceability;
-        totEnergy += track.Energy;
-        totKey += track.Key;
-        totMode += track.Mode;
-        totLoudness += track.Loudness;
-        totSpeechiness += track.Speechiness;
-        totAcousticness += track.Acousticness;
-        totInstrumentalness += track.Instrumentalness;
-        totLiveness += track.Liveness;
-        totValence += track.Valence;
-        totTempo += track.Tempo;
-        totDuration += track.Duration_ms;
-    }
-
-    var avgDance = totDance / c;
-    var avgEnergy = totEnergy / c;
-    var avgKey = totKey / c;
-    var avgMode = totMode / c;
-    var avgLoud = totLoudness / c;
-    var avgSpeech = totSpeechiness / c;
-    var avgAcoust = totAcousticness / c;
-    var avgInst = totInstrumentalness / c;
-    var avgLive = totLiveness / c;
-    var avgVal = totValence / c;
-    var avgTempo = totTempo / c;
-    var avgDur = totDuration / c;
-
-    foreach (var track in Model)
-    {
-        stdDance += (float?)Math.Pow((double)(track.Danceability-avgDance),2);
-        stdEnergy += (float?)Math.Pow((double)(track.Energy-avgEnergy),2);
-        stdKey += (int?)Math.Pow((double)(track.Key-avgKey),2);
-        stdMode += (int?)Math.Pow((double)(track.Mode-avgMode),2);
-        stdLoudness += (float?)Math.Pow((double)(track.Loudness -avgLoud),2);
-        stdSpeechiness += (float?)Math.Pow((double)(track.Speechiness-avgSpeech),2);
-        stdAcousticness += (float?)Math.Pow((double)(track.Acousticness-avgAcoust),2);
-        stdInstrumentalness += (float?)Math.Pow((double)(track.Instrumentalness-avgInst),2);
-        stdLiveness += (float?)Math.Pow((double)(track.Liveness -avgLive),2);
-        stdValence += (float?)Math.Pow((double)(track.Valence-avgVal),2);
-        stdTempo += (float?)Math.Pow((double)(track.Tempo-avgTempo),2);
-        stdDuration += (long?)Math.Pow((double)(track.Duration_ms-avgDur),2);
-    }
-
-    stdDance = (float?)Math.Sqrt((double)(stdDance/=c));
-    stdEnergy=(float?)Math.Sqrt((double)(stdEnergy/=c));
-    stdKey=(int?)Math.Sqrt((double)(stdKey/=c));
-    stdMode=(int?)Math.Sqrt((double)(stdMode/=c));
-    stdLoudness=(float?)Math.Sqrt((double)(stdLoudness/=c));
-    stdSpeechiness=(float?)Math.Sqrt((double)(stdSpeechiness/=c));
-    stdAcousticness=(float?)Math.Sqrt((double)(stdAcousticness/=c));
-    stdInstrumentalness =(float?)Math.Sqrt((double)(stdInstrumentalness/=c));
-    stdLiveness=(float?)Math.Sqrt((double)(stdLiveness/=c));
-    stdValence=(float?)Math.Sqrt((double)(stdValence/=c));
-    stdTempo=(float?)Math.Sqrt((double)(stdTempo/=c));
-    stdDuration=(int?)Math.Sqrt((double)(stdDuration/=c));
+﻿@model SpottyTry2.Models.AdvTrackCalc
 
 
-    }
     <table class="table table-bordered table-responsive table-striped">
         <thead>
             <tr>
@@ -151,7 +66,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var track in Model)
+            @foreach (var track in Model.Tracks)
             {
                 <tr>
                 <td>
@@ -219,34 +134,34 @@
         <tr>
             <td><b>Average</b></td>
             <td></td>
-            <td>@avgDance</td>
-            <td>@avgEnergy</td>
-            <td>@avgKey</td>
-            <td>@avgMode</td>
-            <td>@avgLoud</td>
-            <td>@avgSpeech</td>
-            <td>@avgAcoust</td>
-            <td>@avgInst</td>
-            <td>@avgLive</td>
-            <td>@avgVal</td>
-            <td>@avgTempo</td>
-            <td>@avgDur</td>
+            <td>@Model.AvgDance</td>
+            <td>@Model.AvgEnergy</td>
+            <td>@Model.AvgKey</td>
+            <td>@Model.AvgMode</td>
+            <td>@Model.AvgLoudness</td>
+            <td>@Model.AvgSpeechiness</td>
+            <td>@Model.AvgAcousticness</td>
+            <td>@Model.AvgInstrumentalness</td>
+            <td>@Model.AvgLiveness</td>
+            <td>@Model.AvgValence</td>
+            <td>@Model.AvgTempo</td>
+            <td>@Model.AvgDuration</td>
         </tr>
         <tr>
             <td>Std Deviation</td>
             <td></td>
-            <td>@stdDance</td>
-            <td>@stdEnergy</td>
-            <td>@stdKey</td>
-            <td>@stdMode</td>
-            <td>@stdLoudness</td>
-            <td>@stdSpeechiness</td>
-            <td>@stdAcousticness</td>
-            <td>@stdInstrumentalness</td>
-            <td>@stdLiveness</td>
-            <td>@stdValence</td>
-            <td>@stdTempo</td>
-            <td>@stdDuration</td>
+            <td>@Model.StdDance</td>
+            <td>@Model.StdEnergy</td>
+            <td>@Model.StdKey</td>
+            <td>@Model.StdMode</td>
+            <td>@Model.StdLoudness</td>
+            <td>@Model.StdSpeechiness</td>
+            <td>@Model.StdAcousticness</td>
+            <td>@Model.StdInstrumentalness</td>
+            <td>@Model.StdLiveness</td>
+            <td>@Model.StdValence</td>
+            <td>@Model.StdTempo</td>
+            <td>@Model.StdDuration</td>
         </tr>
             
             </tbody>
