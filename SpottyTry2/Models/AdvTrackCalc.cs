@@ -56,8 +56,37 @@ namespace SpottyTry2.Models
         public float? AvgValence { get; set; }
         public float? AvgTempo { get; set; }
         public int? AvgDuration { get; set; }
-
+        public Dictionary<string,int> GenreCount { get; set; }
         public int? Total { get; set; }
+
+        public AdvTrackCalc()
+        {
+            Dance = new List<float?>();
+            Energy = new List<float?>();
+            Key = new List<int?>();
+            Mode = new List<int?>();
+            Loudness = new List<float?>();
+            Speechiness = new List<float?>();
+            Acousticness = new List<float?>();
+            Instrumentalness = new List<float?>();
+            Liveness = new List<float?>();
+            Valence = new List<float?>();
+            Tempo = new List<float?>();
+            Duration = new List<int?>();
+            GenreCount = new Dictionary<string, int>();
+            TotDance = 0;
+            TotEnergy = 0;
+            TotKey = 0;
+            TotMode = 0;
+            TotLoudness = 0;
+            TotSpeechiness = 0;
+            TotAcousticness = 0;
+            TotInstrumentalness = 0;
+            TotLiveness = 0;
+            TotValence = 0;
+            TotTempo = 0;
+            TotDuration = 0;
+        }
 
         public double GetStdDev(float? avg, List<float?> val)
         {

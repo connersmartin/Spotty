@@ -101,118 +101,9 @@ namespace SpottyTry2.Controllers
        //Returns the Audio Feature info for a given Playlist/Album
        public async Task<ActionResult> ViewFeatures(string href)
         {
-            var advTrackCalc = new AdvTrackCalc()
-            {
-                Dance = new List<float?>(),
-                Energy = new List<float?>(),
-                Key = new List<int?>(),
-                Mode = new List<int?>(),
-                Loudness = new List<float?>(),
-                Speechiness = new List<float?>(),
-                Acousticness = new List<float?>(),
-                Instrumentalness = new List<float?>(),
-                Liveness = new List<float?>(),
-                Valence = new List<float?>(),
-                Tempo = new List<float?>(),
-                Duration = new List<int?>(),
-                TotDance = 0,
-                TotEnergy = 0,
-                TotKey = 0,
-                TotMode = 0,
-                TotLoudness = 0,
-                TotSpeechiness = 0,
-                TotAcousticness = 0,
-                TotInstrumentalness = 0,
-                TotLiveness = 0,
-                TotValence = 0,
-                TotTempo = 0,
-                TotDuration = 0
-            };
-            var testTrack = new List<AdvTrack>();
-            var res = await GetPlaylistTracks("https://api.spotify.com/v1/playlists/"+href);
-            var tracks = new List<string>();
-            foreach (var t in res)
-            {
-                tracks.Add(t.Track.Id);
-                testTrack.Add(new AdvTrack()
-                {
-                    Id = t.Track.Id,
-                    Artist = t.Track.Artists.FirstOrDefault().Name,
-                    Name = t.Track.Name
-                });
-            }
+            var adv = await GetAdvAudioFeatures(href);
 
-            //Jesus this is ugly
-
-            var advTracks = await GetAudioFeatures(tracks.ToArray());
-            advTrackCalc.Total = advTracks.Count;
-            foreach (var track in advTracks)
-            {
-                foreach (var t in testTrack)
-                {
-                    if (track.Id==t.Id)
-                    {
-                        track.Name = t.Name;
-                        track.Artist = t.Artist;
-                    }
-                }
-                advTrackCalc.Acousticness.Add(track.Acousticness);
-                advTrackCalc.TotAcousticness += track.Acousticness;
-                advTrackCalc.Dance.Add(track.Danceability);
-                advTrackCalc.TotDance += track.Danceability;
-                advTrackCalc.Energy.Add(track.Energy);
-                advTrackCalc.TotEnergy += track.Energy;
-                advTrackCalc.Key.Add(track.Key);
-                advTrackCalc.TotKey += track.Key;
-                advTrackCalc.Mode.Add(track.Mode);
-                advTrackCalc.TotMode += track.Mode;
-                advTrackCalc.Loudness.Add(track.Loudness);
-                advTrackCalc.TotLoudness += track.Loudness;
-                advTrackCalc.Speechiness.Add(track.Speechiness);
-                advTrackCalc.TotSpeechiness += track.Speechiness;
-                advTrackCalc.Instrumentalness.Add(track.Instrumentalness);
-                advTrackCalc.TotInstrumentalness += track.Instrumentalness;
-                advTrackCalc.Liveness.Add(track.Liveness);
-                advTrackCalc.TotLiveness += track.Liveness;
-                advTrackCalc.Valence.Add(track.Valence);
-                advTrackCalc.TotValence += track.Valence;
-                advTrackCalc.Duration.Add(track.Duration_ms);
-                advTrackCalc.TotDuration += track.Duration_ms;
-                advTrackCalc.Tempo.Add(track.Tempo);
-                advTrackCalc.TotTempo += track.Tempo;
-            }
-            advTrackCalc.Tracks = advTracks;
-
-            advTrackCalc.AvgAcousticness = (advTrackCalc.TotAcousticness / advTrackCalc.Total);
-            advTrackCalc.AvgDance = (advTrackCalc.TotDance / advTrackCalc.Total);
-            advTrackCalc.AvgEnergy = (advTrackCalc.TotEnergy / advTrackCalc.Total);
-            advTrackCalc.AvgKey = (advTrackCalc.TotKey / advTrackCalc.Total);
-            advTrackCalc.AvgMode = (advTrackCalc.TotMode / advTrackCalc.Total);
-            advTrackCalc.AvgLoudness = (advTrackCalc.TotLoudness / advTrackCalc.Total);
-            advTrackCalc.AvgSpeechiness = (advTrackCalc.TotSpeechiness / advTrackCalc.Total);
-            advTrackCalc.AvgInstrumentalness = (advTrackCalc.TotInstrumentalness / advTrackCalc.Total);
-            advTrackCalc.AvgLiveness = (advTrackCalc.TotLiveness / advTrackCalc.Total);
-            advTrackCalc.AvgLoudness = (advTrackCalc.TotLoudness / advTrackCalc.Total);
-            advTrackCalc.AvgValence = (advTrackCalc.TotValence / advTrackCalc.Total);
-            advTrackCalc.AvgDuration = (advTrackCalc.TotDuration / advTrackCalc.Total);
-            advTrackCalc.AvgTempo = (advTrackCalc.TotTempo / advTrackCalc.Total);
-
-            advTrackCalc.StdAcousticness = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotAcousticness / advTrackCalc.Total, advTrackCalc.Acousticness);
-            advTrackCalc.StdDance = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotDance / advTrackCalc.Total, advTrackCalc.Dance);
-            advTrackCalc.StdEnergy = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotEnergy / advTrackCalc.Total, advTrackCalc.Energy);
-            advTrackCalc.StdKey = (int?)advTrackCalc.GetStdDev(advTrackCalc.TotKey / advTrackCalc.Total, advTrackCalc.Key);
-            advTrackCalc.StdMode = (int?)advTrackCalc.GetStdDev(advTrackCalc.TotMode / advTrackCalc.Total, advTrackCalc.Mode);
-            advTrackCalc.StdLoudness = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotLoudness / advTrackCalc.Total, advTrackCalc.Loudness);
-            advTrackCalc.StdSpeechiness = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotSpeechiness / advTrackCalc.Total, advTrackCalc.Speechiness);
-            advTrackCalc.StdInstrumentalness = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotInstrumentalness / advTrackCalc.Total, advTrackCalc.Instrumentalness);
-            advTrackCalc.StdLiveness = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotLiveness / advTrackCalc.Total, advTrackCalc.Liveness);
-            advTrackCalc.StdLoudness = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotLoudness / advTrackCalc.Total, advTrackCalc.Loudness);
-            advTrackCalc.StdValence = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotValence / advTrackCalc.Total, advTrackCalc.Valence);
-            advTrackCalc.StdDuration = (int?)advTrackCalc.GetStdDev(advTrackCalc.TotDuration / advTrackCalc.Total, advTrackCalc.Duration);
-            advTrackCalc.StdTempo = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotTempo / advTrackCalc.Total, advTrackCalc.Tempo);
-
-
-            return View("ViewFeatures", advTrackCalc );
+            return View("ViewFeatures", adv );
         }
 
         //Gets some info for playlist creation and caches it
@@ -377,6 +268,19 @@ namespace SpottyTry2.Controllers
 
             return chosen.Id;
         }
+        /// <summary>
+        /// Gets a full artist profile based on their id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<ArtistFull> GetArtistFull(string id)
+        {
+            var getString = "https://api.spotify.com/v1/artists/"+id;
+            var response = await SpotApi(HttpMethod.Get, getString);
+            var art = JsonConvert.DeserializeObject<ArtistFull>(response);
+
+            return art;
+        }
 
         /// <summary>
         /// POSTS tracks to a given playlist
@@ -470,7 +374,7 @@ namespace SpottyTry2.Controllers
             };
             var newList = await CreateNewPlaylist(pc);
 
-            AddTracksToPlaylist(tempList, newList.Id);
+            var x = await AddTracksToPlaylist(tempList, newList.Id);
             
             return RedirectToAction("ViewPlaylist", "Home", new { href = newList.Id }); ;
         }
@@ -514,7 +418,137 @@ namespace SpottyTry2.Controllers
 
             return math;
         }
-        
+        /// <summary>
+        /// Get AdvTrackCalc from a playlist href
+        /// </summary>
+        /// <param name="href"></param>
+        /// <returns></returns>
+        public async Task<AdvTrackCalc> GetAdvAudioFeatures(string href)
+        {
+            var advTrackCalc = new AdvTrackCalc();
+            var allArtId = new List<string>();
+            var allArt = new List<ArtistFull>();
+            var testTrack = new List<AdvTrack>();
+            var res = await GetPlaylistTracks("https://api.spotify.com/v1/playlists/" + href);
+            var tracks = new List<string>();
+            foreach (var t in res)
+            {
+                tracks.Add(t.Track.Id);
+                testTrack.Add(new AdvTrack()
+                {
+                    Id = t.Track.Id,
+                    Artist = t.Track.Artists.FirstOrDefault().Name,
+                    Name = t.Track.Name
+                });
+                allArtId.Add(t.Track.Artists.FirstOrDefault().Id);
+            }
+
+            foreach (var id in allArtId)
+            {
+                allArt.Add(await GetArtistFull(id));
+            }
+
+            foreach (var art in allArt)
+            {
+                foreach (var g in art.Genres)
+                {
+                    if (!advTrackCalc.GenreCount.ContainsKey(g))
+                    {
+                        advTrackCalc.GenreCount.Add(g, 0);
+                    }
+                    if (advTrackCalc.GenreCount.ContainsKey(g))
+                    {
+                        advTrackCalc.GenreCount[g]++;
+                    }
+                }
+            }
+
+            var genreList = advTrackCalc.GenreCount.ToList();
+
+            genreList.Sort((x, y) => x.Value.CompareTo(y.Value));
+
+            advTrackCalc.GenreCount.Clear();
+
+            genreList.RemoveRange(0, genreList.Count - 5);
+
+            foreach (var g in genreList)
+            {
+                advTrackCalc.GenreCount.Add(g.Key, g.Value);
+            }
+
+            //Jesus this is ugly
+
+            var advTracks = await GetAudioFeatures(tracks.ToArray());
+
+            advTrackCalc.Total = advTracks.Count;
+            foreach (var track in advTracks)
+            {
+                foreach (var t in testTrack)
+                {
+                    if (track.Id == t.Id)
+                    {
+                        track.Name = t.Name;
+                        track.Artist = t.Artist;
+                    }
+                }
+                advTrackCalc.Acousticness.Add(track.Acousticness);
+                advTrackCalc.TotAcousticness += track.Acousticness;
+                advTrackCalc.Dance.Add(track.Danceability);
+                advTrackCalc.TotDance += track.Danceability;
+                advTrackCalc.Energy.Add(track.Energy);
+                advTrackCalc.TotEnergy += track.Energy;
+                advTrackCalc.Key.Add(track.Key);
+                advTrackCalc.TotKey += track.Key;
+                advTrackCalc.Mode.Add(track.Mode);
+                advTrackCalc.TotMode += track.Mode;
+                advTrackCalc.Loudness.Add(track.Loudness);
+                advTrackCalc.TotLoudness += track.Loudness;
+                advTrackCalc.Speechiness.Add(track.Speechiness);
+                advTrackCalc.TotSpeechiness += track.Speechiness;
+                advTrackCalc.Instrumentalness.Add(track.Instrumentalness);
+                advTrackCalc.TotInstrumentalness += track.Instrumentalness;
+                advTrackCalc.Liveness.Add(track.Liveness);
+                advTrackCalc.TotLiveness += track.Liveness;
+                advTrackCalc.Valence.Add(track.Valence);
+                advTrackCalc.TotValence += track.Valence;
+                advTrackCalc.Duration.Add(track.Duration_ms);
+                advTrackCalc.TotDuration += track.Duration_ms;
+                advTrackCalc.Tempo.Add(track.Tempo);
+                advTrackCalc.TotTempo += track.Tempo;
+            }
+            advTrackCalc.Tracks = advTracks;
+
+            advTrackCalc.AvgAcousticness = (advTrackCalc.TotAcousticness / advTrackCalc.Total);
+            advTrackCalc.AvgDance = (advTrackCalc.TotDance / advTrackCalc.Total);
+            advTrackCalc.AvgEnergy = (advTrackCalc.TotEnergy / advTrackCalc.Total);
+            advTrackCalc.AvgKey = (advTrackCalc.TotKey / advTrackCalc.Total);
+            advTrackCalc.AvgMode = (advTrackCalc.TotMode / advTrackCalc.Total);
+            advTrackCalc.AvgLoudness = (advTrackCalc.TotLoudness / advTrackCalc.Total);
+            advTrackCalc.AvgSpeechiness = (advTrackCalc.TotSpeechiness / advTrackCalc.Total);
+            advTrackCalc.AvgInstrumentalness = (advTrackCalc.TotInstrumentalness / advTrackCalc.Total);
+            advTrackCalc.AvgLiveness = (advTrackCalc.TotLiveness / advTrackCalc.Total);
+            advTrackCalc.AvgLoudness = (advTrackCalc.TotLoudness / advTrackCalc.Total);
+            advTrackCalc.AvgValence = (advTrackCalc.TotValence / advTrackCalc.Total);
+            advTrackCalc.AvgDuration = (advTrackCalc.TotDuration / advTrackCalc.Total);
+            advTrackCalc.AvgTempo = (advTrackCalc.TotTempo / advTrackCalc.Total);
+
+            advTrackCalc.StdAcousticness = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotAcousticness / advTrackCalc.Total, advTrackCalc.Acousticness);
+            advTrackCalc.StdDance = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotDance / advTrackCalc.Total, advTrackCalc.Dance);
+            advTrackCalc.StdEnergy = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotEnergy / advTrackCalc.Total, advTrackCalc.Energy);
+            advTrackCalc.StdKey = (int?)advTrackCalc.GetStdDev(advTrackCalc.TotKey / advTrackCalc.Total, advTrackCalc.Key);
+            advTrackCalc.StdMode = (int?)advTrackCalc.GetStdDev(advTrackCalc.TotMode / advTrackCalc.Total, advTrackCalc.Mode);
+            advTrackCalc.StdLoudness = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotLoudness / advTrackCalc.Total, advTrackCalc.Loudness);
+            advTrackCalc.StdSpeechiness = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotSpeechiness / advTrackCalc.Total, advTrackCalc.Speechiness);
+            advTrackCalc.StdInstrumentalness = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotInstrumentalness / advTrackCalc.Total, advTrackCalc.Instrumentalness);
+            advTrackCalc.StdLiveness = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotLiveness / advTrackCalc.Total, advTrackCalc.Liveness);
+            advTrackCalc.StdLoudness = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotLoudness / advTrackCalc.Total, advTrackCalc.Loudness);
+            advTrackCalc.StdValence = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotValence / advTrackCalc.Total, advTrackCalc.Valence);
+            advTrackCalc.StdDuration = (int?)advTrackCalc.GetStdDev(advTrackCalc.TotDuration / advTrackCalc.Total, advTrackCalc.Duration);
+            advTrackCalc.StdTempo = (float?)advTrackCalc.GetStdDev(advTrackCalc.TotTempo / advTrackCalc.Total, advTrackCalc.Tempo);
+
+            return advTrackCalc;
+        }
+
         #endregion
 
         //Helper functions for Spotify API

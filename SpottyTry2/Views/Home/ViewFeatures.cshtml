@@ -132,21 +132,26 @@
 
         }
         <tr>
-            <td><b>Average</b></td>
-            <td></td>
-            <td>@Model.AvgDance</td>
-            <td>@Model.AvgEnergy</td>
-            <td>@Model.AvgKey</td>
-            <td>@Model.AvgMode</td>
-            <td>@Model.AvgLoudness</td>
-            <td>@Model.AvgSpeechiness</td>
-            <td>@Model.AvgAcousticness</td>
-            <td>@Model.AvgInstrumentalness</td>
-            <td>@Model.AvgLiveness</td>
-            <td>@Model.AvgValence</td>
-            <td>@Model.AvgTempo</td>
-            <td>@Model.AvgDuration</td>
-        </tr>
+            @using (Html.BeginForm("NewPlaylist", "Home"))
+            {
+                @Html.AntiForgeryToken()
+
+                <td><b>Average</b></td>
+                <td><button type="submit">Average</button></td>
+                <td>@Model.AvgDance</td>
+                <td>@Model.AvgEnergy</td>
+                <td>@Model.AvgKey</td>
+                <td>@Model.AvgMode</td>
+                <td>@Model.AvgLoudness</td>
+                <td>@Model.AvgSpeechiness</td>
+                <td>@Model.AvgAcousticness</td>
+                <td>@Model.AvgInstrumentalness</td>
+                <td>@Model.AvgLiveness</td>
+                <td>@Model.AvgValence</td>
+                <td>@Model.AvgTempo</td>
+                <td>@Model.AvgDuration</td>
+            }
+            </tr>
         <tr>
             <td>Std Deviation</td>
             <td></td>
@@ -162,6 +167,14 @@
             <td>@Model.StdValence</td>
             <td>@Model.StdTempo</td>
             <td>@Model.StdDuration</td>
+        </tr>
+        <tr>
+            <td>Most common Genre</td>
+            <td></td>
+            @foreach (var g in Model.GenreCount)
+            {
+                <td>@g.Key</td>
+            }
         </tr>
             
             </tbody>

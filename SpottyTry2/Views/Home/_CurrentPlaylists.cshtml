@@ -16,6 +16,7 @@
                 <td>@Html.ActionLink(m.Name,"ViewPlaylist",new { href = m.Id }, null)</td>
                 <td>@m.Length</td>
                 <td>@m.Count</td>
+                <td>@Html.ActionLink("Get Audio Data", "ViewFeatures", new { href = m.Id }, null)</td>
             </tr> 
         }
     </tbody>
