@@ -106,7 +106,30 @@ namespace SpottyTry2.Controllers
             return View("ViewFeatures", adv );
         }
 
-        //Gets some info for playlist creation and caches it
+        //Playlist creation from Audio Features
+        public async Task<ActionResult> NewAdvPlaylist(AdvTrackCalc adv)
+        {
+            var user = await GetCurrentUser();
+            var advTrack = new AdvTrack()
+            {
+                Acousticness = adv.AvgAcousticness,
+                Danceability = adv.AvgDance,
+                Energy = adv.AvgEnergy,
+                Instrumentalness = adv.AvgInstrumentalness,
+                Liveness = adv.AvgLiveness,
+                Loudness = adv.AvgLoudness,
+                Speechiness = adv.AvgSpeechiness,
+                Tempo = adv.AvgTempo,
+                Valence = adv.AvgValence,
+                UserId=user.Id,
+                GenreList = adv.GenreCount.Keys.ToList(),
+                Advanced=true
+                
+            };
+            return PartialView("_AdvTrackFeatures", advTrack);
+        }
+
+        //Gets some info for normal playlist creation and caches it
         public async Task<ActionResult> PlayCreate()
         {
             //gets the id of the user
@@ -469,7 +492,13 @@ namespace SpottyTry2.Controllers
 
             advTrackCalc.GenreCount.Clear();
 
-            genreList.RemoveRange(0, genreList.Count - 5);
+            var limit = 5;
+
+            if (genreList.Count>limit)
+            {
+                genreList.RemoveRange(0, genreList.Count - limit);
+            }
+
 
             foreach (var g in genreList)
             {

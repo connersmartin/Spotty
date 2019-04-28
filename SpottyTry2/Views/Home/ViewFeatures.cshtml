@@ -1,74 +1,78 @@
 ﻿@model SpottyTry2.Models.AdvTrackCalc
 
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
 
-    <table class="table table-bordered table-responsive table-striped">
-        <thead>
+
+<table class="table table-bordered table-responsive table-striped">
+    <thead>
+        <tr>
+            <th>
+                (Artist)
+            </th>
+
+            <th>
+                (Track)
+            </th>
+
+            <th>
+                (Danceability)
+            </th>
+
+            <th>
+                (Energy)
+            </th>
+
+            <th>
+                (Key)
+            </th>
+
+            <th>
+                (Mode)
+            </th>
+
+            <th>
+                (Loudness)
+            </th>
+
+            <th>
+                (Speechiness)
+            </th>
+
+            <th>
+                (Acousticness)
+            </th>
+
+            <th>
+                (Instrumentalness)
+            </th>
+
+            <th>
+                (Liveness)
+            </th>
+
+            <th>
+                (Valence)
+            </th>
+
+            <th>
+                (Tempo)
+            </th>
+
+            <th>
+                (Duration_ms)
+            </th>
+
+            <th>
+                (Time_signature)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var track in Model.Tracks)
+        {
             <tr>
-                <th>
-                    (Artist)
-                </th>
-
-                <th>
-                    (Track)
-                </th>
-
-                <th>
-                    (Danceability)
-                </th>
-
-                <th>
-                    (Energy)
-                </th>
-
-                <th>
-                    (Key)
-                </th>
-
-                <th>
-                    (Mode)
-                </th>
-
-                <th>
-                    (Loudness)
-                </th>
-
-                <th>
-                    (Speechiness)
-                </th>
-
-                <th>
-                    (Acousticness)
-                </th>
-
-                <th>
-                    (Instrumentalness)
-                </th>
-
-                <th>
-                    (Liveness)
-                </th>
-
-                <th>
-                    (Valence)
-                </th>
-
-                <th>
-                    (Tempo)
-                </th>
-
-                <th>
-                    (Duration_ms)
-                </th>
-
-                <th>
-                    (Time_signature)
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var track in Model.Tracks)
-            {
-                <tr>
                 <td>
                     @Html.DisplayFor(model => track.Artist)
                 </td>
@@ -131,14 +135,14 @@
             </tr>
 
         }
-        <tr>
-            @using (Html.BeginForm("NewPlaylist", "Home"))
-            {
+        @using (Html.BeginForm("NewAdvPlaylist", "Home"))
+        {
+            <tr>
                 @Html.AntiForgeryToken()
 
                 <td><b>Average</b></td>
                 <td><button type="submit">Average</button></td>
-                <td>@Model.AvgDance</td>
+                <td>@Html.TextBoxFor(model => Model.AvgDance, Model.AvgDance.ToString(), null)</td>
                 <td>@Model.AvgEnergy</td>
                 <td>@Model.AvgKey</td>
                 <td>@Model.AvgMode</td>
@@ -150,35 +154,36 @@
                 <td>@Model.AvgValence</td>
                 <td>@Model.AvgTempo</td>
                 <td>@Model.AvgDuration</td>
-            }
+
             </tr>
-        <tr>
-            <td>Std Deviation</td>
-            <td></td>
-            <td>@Model.StdDance</td>
-            <td>@Model.StdEnergy</td>
-            <td>@Model.StdKey</td>
-            <td>@Model.StdMode</td>
-            <td>@Model.StdLoudness</td>
-            <td>@Model.StdSpeechiness</td>
-            <td>@Model.StdAcousticness</td>
-            <td>@Model.StdInstrumentalness</td>
-            <td>@Model.StdLiveness</td>
-            <td>@Model.StdValence</td>
-            <td>@Model.StdTempo</td>
-            <td>@Model.StdDuration</td>
-        </tr>
-        <tr>
-            <td>Most common Genre</td>
-            <td></td>
-            @foreach (var g in Model.GenreCount)
-            {
-                <td>@g.Key</td>
-            }
-        </tr>
-            
-            </tbody>
-        </table>
+            <tr>
+                <td>Std Deviation</td>
+                <td></td>
+                <td>@Model.StdDance</td>
+                <td>@Model.StdEnergy</td>
+                <td>@Model.StdKey</td>
+                <td>@Model.StdMode</td>
+                <td>@Model.StdLoudness</td>
+                <td>@Model.StdSpeechiness</td>
+                <td>@Model.StdAcousticness</td>
+                <td>@Model.StdInstrumentalness</td>
+                <td>@Model.StdLiveness</td>
+                <td>@Model.StdValence</td>
+                <td>@Model.StdTempo</td>
+                <td>@Model.StdDuration</td>
+            </tr>
+            <tr>
+                <td>Most common Genre</td>
+                <td></td>
+                @foreach (var g in Model.GenreCount)
+                {
+                    <td>@g.Key</td>
+                }
+            </tr>
+        }
+
+    </tbody>
+</table>
 <p>
     @Html.ActionLink("Back to List", "Index")
 </p>

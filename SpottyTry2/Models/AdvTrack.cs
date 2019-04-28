@@ -56,7 +56,7 @@ namespace SpottyTry2.Models
         public int? MaxDuration_ms { get; set; }
         public int? MaxTime_signature { get; set; }
 
-
+        public List<string> GenreList { get; set; }
         /*
          *  acousticness	float	A confidence measure from 0.0 to 1.0 of whether the track is acoustic. 1.0 represents high confidence the track is acoustic.
             analysis_url	string	An HTTP URL to access the full audio analysis of this track. An access token is required to access this data.
