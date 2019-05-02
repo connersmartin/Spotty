@@ -28,7 +28,7 @@
                 @Html.ValidationMessageFor(model => model.Artist, "", new { @class = "text-danger" })
             </div>
         </div>
-        @if (Model.Genre != null)
+        @if (Model.Genres != null)
         {
 
             <div class="form-group">
@@ -39,7 +39,7 @@
                 </div>
             </div>
         }
-        @if (Model.GenreList.Count != 0)
+        @if (Model.GenreList != null)
         {
             <div class="form-group">
                 @Html.LabelFor(model => model.GenreList, "Most Prevalent Genres", htmlAttributes: new { @class = "control-label col-md-2" })

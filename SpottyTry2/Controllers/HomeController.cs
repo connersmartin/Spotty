@@ -93,7 +93,7 @@ namespace SpottyTry2.Controllers
             //create playlist after getting tracks in case there is an error
             var playlist = await CreateNewPlaylist(playCreate);
 
-            var p = AddTracksToPlaylist(tracks, playlist.Id);
+            var p = await AddTracksToPlaylist(tracks, playlist.Id);
 
             return RedirectToAction("ViewPlaylist","Home", new { href = playlist.Id });
         }
