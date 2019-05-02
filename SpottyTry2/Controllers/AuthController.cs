@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -23,11 +24,15 @@ namespace SpottyTry2.Controllers
         public async Task<RedirectResult> Spotify()
         {
             //Not running this through API function since we require a specific response on this
+            //Need to better parameterize this
             HttpClient rest = new HttpClient();
             try
             {
+                var clientId = ConfigurationManager.AppSettings["spotClientId"];
+                var localHostUri = ConfigurationManager.AppSettings["localHost"]+"/Auth/TokenGrabber";
+                var getString = string.Format("https://accounts.spotify.com/authorize?client_id={0}&scope=playlist-modify-public%20playlist-modify-private%20playlist-read-private&response_type=code&redirect_uri={1}",clientId,localHostUri);
                 // TODO parameterize this to use config values
-                HttpResponseMessage response = await rest.GetAsync("https://accounts.spotify.com/authorize?client_id=fa659689165644618ef6368f3d2927b2&scope=playlist-modify-public%20playlist-modify-private%20playlist-read-private&response_type=code&redirect_uri=http://localhost:21722/Auth/TokenGrabber");
+                HttpResponseMessage response = await rest.GetAsync(getString);
 
                 return Redirect(response.RequestMessage.RequestUri.ToString());
 
@@ -49,10 +54,10 @@ namespace SpottyTry2.Controllers
 
             var tokenResponse = HttpContext.Request.QueryString;
 
-            paramDict.Add("client_id", "fa659689165644618ef6368f3d2927b2");
-            paramDict.Add("client_secret", "d13f94fafb0c468f98a30961a5c5b468");
+            paramDict.Add("client_id", ConfigurationManager.AppSettings["spotClientId"]);
+            paramDict.Add("client_secret", ConfigurationManager.AppSettings["spotClientSecret"]);
             paramDict.Add("grant_type", "authorization_code");
-            paramDict.Add("redirect_uri", "http://localhost:21722/Auth/TokenGrabber");
+            paramDict.Add("redirect_uri", ConfigurationManager.AppSettings["localHost"]+"/Auth/TokenGrabber");
             paramDict.Add("code", tokenResponse["code"]);
 
             var postString = "https://accounts.spotify.com/api/token";
