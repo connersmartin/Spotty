@@ -57,6 +57,7 @@ namespace SpottyTry2.Models
         public float? AvgTempo { get; set; }
         public int? AvgDuration { get; set; }
         public Dictionary<string,int> GenreCount { get; set; }
+        public List<string> GenreList { get; set; }
         public int? Total { get; set; }
 
         public AdvTrackCalc()
@@ -74,6 +75,7 @@ namespace SpottyTry2.Models
             Tempo = new List<float?>();
             Duration = new List<int?>();
             GenreCount = new Dictionary<string, int>();
+            GenreList = new List<string>();
             TotDance = 0;
             TotEnergy = 0;
             TotKey = 0;

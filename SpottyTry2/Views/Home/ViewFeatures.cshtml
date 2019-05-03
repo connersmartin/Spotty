@@ -137,47 +137,47 @@
         }
         @using (Html.BeginForm("NewAdvPlaylist", "Home"))
         {
-            <tr>
-                @Html.AntiForgeryToken()
+    <tr>
+        @Html.AntiForgeryToken()
 
-                <td><b>Average</b></td>
-                <td><button type="submit">Average</button></td>
-                <td>@Html.TextBoxFor(model => Model.AvgDance, Model.AvgDance.ToString(), null)</td>
-                <td>@Model.AvgEnergy</td>
-                <td>@Model.AvgKey</td>
-                <td>@Model.AvgMode</td>
-                <td>@Model.AvgLoudness</td>
-                <td>@Model.AvgSpeechiness</td>
-                <td>@Model.AvgAcousticness</td>
-                <td>@Model.AvgInstrumentalness</td>
-                <td>@Model.AvgLiveness</td>
-                <td>@Model.AvgValence</td>
-                <td>@Model.AvgTempo</td>
-                <td>@Model.AvgDuration</td>
+        <td><b>Average</b></td>
+        <td><button type="submit">Average</button></td>
+        <td>@Html.TextBoxFor(model => Model.AvgDance, Model.AvgDance.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.AvgEnergy, Model.AvgEnergy.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.AvgKey, Model.AvgKey.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.AvgMode, Model.AvgMode.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.AvgLoudness, Model.AvgLoudness.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.AvgSpeechiness, Model.AvgSpeechiness.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.AvgAcousticness, Model.AvgAcousticness.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.AvgInstrumentalness, Model.AvgInstrumentalness.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.AvgLiveness, Model.AvgLiveness.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.AvgValence, Model.AvgValence.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.AvgTempo, Model.AvgTempo.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.AvgDuration, Model.AvgDuration.ToString(), null)</td>
 
-            </tr>
-            <tr>
-                <td>Std Deviation</td>
-                <td></td>
-                <td>@Model.StdDance</td>
-                <td>@Model.StdEnergy</td>
-                <td>@Model.StdKey</td>
-                <td>@Model.StdMode</td>
-                <td>@Model.StdLoudness</td>
-                <td>@Model.StdSpeechiness</td>
-                <td>@Model.StdAcousticness</td>
-                <td>@Model.StdInstrumentalness</td>
-                <td>@Model.StdLiveness</td>
-                <td>@Model.StdValence</td>
-                <td>@Model.StdTempo</td>
-                <td>@Model.StdDuration</td>
-            </tr>
+    </tr>
+    <tr>
+        <td>Std Deviation</td>
+        <td></td>
+        <td>@Html.TextBoxFor(model => Model.StdDance, Model.StdDance.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.StdEnergy, Model.StdEnergy.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.StdKey, Model.StdKey.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.StdMode, Model.StdMode.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.StdLoudness, Model.StdLoudness.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.StdSpeechiness, Model.StdSpeechiness.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.StdAcousticness, Model.StdAcousticness.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.StdInstrumentalness, Model.StdInstrumentalness.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.StdLiveness, Model.StdLiveness.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.StdValence, Model.StdValence.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.StdTempo, Model.StdTempo.ToString(), null)</td>
+        <td>@Html.TextBoxFor(model => Model.StdDuration, Model.StdDuration.ToString(), null)</td>
+    </tr>
             <tr>
                 <td>Most common Genre</td>
                 <td></td>
                 @foreach (var g in Model.GenreCount)
                 {
-                    <td>@g.Key</td>
+                    <td>@Html.TextBoxFor(model => Model.GenreList, g.Key.ToString(), null)</td>
                 }
             </tr>
         }

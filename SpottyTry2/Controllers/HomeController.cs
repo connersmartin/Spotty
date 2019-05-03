@@ -109,6 +109,8 @@ namespace SpottyTry2.Controllers
         //Playlist creation from Audio Features
         public async Task<ActionResult> NewAdvPlaylist(AdvTrackCalc adv)
         {
+            var g = adv.GenreList.ToArray();
+
             var user = await GetCurrentUser();
             var advTrack = new AdvTrack()
             {
@@ -122,8 +124,8 @@ namespace SpottyTry2.Controllers
                 Tempo = adv.AvgTempo,
                 Valence = adv.AvgValence,
                 UserId=user.Id,
-                GenreList = adv.GenreCount.Keys.ToList(),
-                Advanced=true
+                GenreList = adv.GenreList,
+                Genre = string.Join(",",g)
                 
             };
             return PartialView("_AdvTrackFeatures", advTrack);
