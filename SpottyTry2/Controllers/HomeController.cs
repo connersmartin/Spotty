@@ -229,6 +229,43 @@ namespace SpottyTry2.Controllers
             var trackList = new List<Track>();
             var getString = "https://api.spotify.com/v1/recommendations";
 
+            //need to replace selected genres with closest match.
+            //LoadAndReplaceGenres(playCreate.Genre)
+
+            var genreString = "https://api.spotify.com/v1/recommendations/available-genre-seeds";
+
+            var response = await SpotApi(HttpMethod.Get, genreString);
+
+            var j = JsonConvert.DeserializeObject<GenreList>(response).Genres.ToList<string>();
+            var splitGenre = playCreate.Genre.Split(',').ToList<string>();
+            var genreList = "";
+            foreach (var genre in j.ToList<string>())
+            {
+                foreach (var g in splitGenre.ToList<string>())
+                {
+                    if (g==genre)
+                    {
+                        genreList += g + ",";
+                    }
+                }
+            }
+
+            if (genreList == "")
+            {
+                foreach (var genre in j)
+                {
+                    foreach (var g in splitGenre)
+                    {
+                        if (g.Contains(genre) && !genreList.Contains(genre))
+                        {
+                            genreList += genre + ",";
+                        }
+                    }
+                }
+            }
+
+            playCreate.Genre = genreList;
+
             var paramDict = await BuildRecParamDict(playCreate);
                         
             //get recommended tracks based on seeds
@@ -589,8 +626,8 @@ namespace SpottyTry2.Controllers
         public async Task<Dictionary<string,string>> BuildRecParamDict(AdvTrack a)
         {
             var paramDict = new Dictionary<string, string>(){{"limit", "100" }};
-            if (a.Genre != null){paramDict.Add("seed_genres", a.Genre);}
-            if (a.Artist != null){ paramDict.Add("seed_artists", await GetSingleArtist(a.Artist)); }
+            if (a.Genre != null && a.Genre.Trim() !="" ){paramDict.Add("seed_genres", a.Genre);}
+            if (a.Artist != null && a.Artist.Trim() != "") { paramDict.Add("seed_artists", await GetSingleArtist(a.Artist)); }
             if (a.Acousticness != null) { paramDict.Add("target_acousticness", a.Acousticness.ToString()); }
             if (a.Danceability != null) { paramDict.Add("target_danceability", a.Danceability.ToString()); }
             if (a.Energy != null) { paramDict.Add("target_energy", a.Energy.ToString()); }
