@@ -237,7 +237,7 @@ namespace SpottyTry2.Controllers
             var response = await SpotApi(HttpMethod.Get, genreString);
 
             var j = JsonConvert.DeserializeObject<GenreList>(response).Genres.ToList<string>();
-            var splitGenre = playCreate.Genre.Split(',').ToList<string>();
+            var splitGenre = playCreate.Genre.Replace(" ","-").Split(',').ToList<string>();
             var genreList = "";
             foreach (var genre in j.ToList<string>())
             {
